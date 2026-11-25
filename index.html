@@ -7,17 +7,13 @@
     <style>
         :root {
             --primary: #334475;
-            --sky-top: #2f5597;
-            --sky-mid: #4e7ac7;
-            --sky-horizon: #9fc0ee;
-            --sky-bottom: #0d1630;
             --accent: #94B3FB;
             --text: #FFFFFF;
             --text-muted: #e9f0ff;
             --glass: rgba(11, 18, 38, 0.78);
-            --glass-strong: rgba(10, 16, 35, 0.84);
+            --glass-strong: rgba(10, 16, 35, 0.85);
             --glass-hover: rgba(20, 32, 66, 0.92);
-            --border: rgba(148, 179, 251, 0.36);
+            --border: rgba(148, 179, 251, 0.35);
         }
 
         * {
@@ -30,7 +26,7 @@
         }
 
         body {
-            background: linear-gradient(180deg, #2b4c8c 0%, #446db8 26%, #1f3363 62%, #0b1329 100%);
+            background: linear-gradient(180deg, #3c69b5 0%, #75a2e3 28%, #253d75 68%, #0a1126 100%);
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
@@ -38,7 +34,6 @@
             position: relative;
         }
 
-        /* Детальні 3D-хмари на весь екран */
         #skyCanvas {
             position: fixed;
             top: 0;
@@ -49,14 +44,14 @@
             pointer-events: none;
         }
 
-        .sky-atmosphere {
+        .sky-vignette {
             position: fixed;
             inset: 0;
             z-index: -2;
             pointer-events: none;
             background:
-                radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 58%),
-                linear-gradient(180deg, rgba(14, 24, 52, 0.08) 0%, rgba(8, 13, 28, 0.72) 100%);
+                radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 56%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(7, 11, 24, 0.78) 100%);
         }
 
         @keyframes radarSpin {
@@ -66,14 +61,14 @@
 
         .radar-overlay {
             position: fixed;
-            top: 38%;
+            top: 42%;
             left: 50%;
             width: 140vmax;
             height: 140vmax;
             z-index: -1;
             pointer-events: none;
-            opacity: 0.14;
-            animation: radarSpin 110s linear infinite;
+            opacity: 0.11;
+            animation: radarSpin 115s linear infinite;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000' viewBox='0 0 1000 1000'%3E%3Cg fill='none' stroke='%2394B3FB' stroke-width='1.5'%3E%3Ccircle cx='500' cy='500' r='220'/%3E%3Ccircle cx='500' cy='500' r='380'/%3E%3Ccircle cx='500' cy='500' r='480' stroke-dasharray='6 12'/%3E%3Cline x1='500' y1='20' x2='500' y2='980' stroke-dasharray='8 10'/%3E%3Cline x1='20' y1='500' x2='980' y2='500' stroke-dasharray='8 10'/%3E%3Cline x1='160' y1='160' x2='840' y2='840' stroke-dasharray='8 10'/%3E%3Cline x1='840' y1='160' x2='160' y2='840' stroke-dasharray='8 10'/%3E%3C/g%3E%3C/svg%3E");
             background-size: contain;
             background-repeat: no-repeat;
@@ -100,25 +95,11 @@
         }
 
         .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
             text-decoration: none;
             color: var(--text);
             font-weight: 800;
             letter-spacing: 1px;
             font-size: 15px;
-        }
-
-        .nav-mini-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.92);
-            padding: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .nav-links {
@@ -164,12 +145,11 @@
             border: 1px solid rgba(148, 179, 251, 0.28);
         }
 
-        /* Головний блок без квадратної рамки — чорний логотип прямо в 3D-хмарах */
         .hero {
-            padding: 26px 16px 56px;
+            padding: 28px 16px 60px;
             text-align: center;
             border-bottom: 1px solid var(--border);
-            perspective: 1200px;
+            perspective: 1100px;
         }
 
         .container {
@@ -177,100 +157,56 @@
             margin: 0 auto;
         }
 
-        .hero-open-stage {
-            position: relative;
-            max-width: 820px;
+        .hero-stage {
+            max-width: 780px;
             margin: 0 auto;
             transform-style: preserve-3d;
             transition: transform 0.2s ease-out;
-            animation: heroAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes heroAppear {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes droneFloat3D {
+        @keyframes floatLogo3D {
             0%, 100% {
-                transform: translate3d(0px, 0px, 30px) rotateZ(-0.7deg) rotateX(1deg);
+                transform: translate3d(0px, 0px, 24px) rotateZ(-0.5deg);
             }
             50% {
-                transform: translate3d(5px, -12px, 45px) rotateZ(0.9deg) rotateX(-1deg);
+                transform: translate3d(4px, -11px, 38px) rotateZ(0.7deg);
             }
         }
 
-        @keyframes cloudMistDrift1 {
-            0%, 100% { transform: translateX(-18px) scale(1); opacity: 0.72; }
-            50% { transform: translateX(22px) scale(1.05); opacity: 0.92; }
-        }
-
-        @keyframes cloudMistDrift2 {
-            0%, 100% { transform: translateX(20px) scale(1.04); opacity: 0.65; }
-            50% { transform: translateX(-20px) scale(0.98); opacity: 0.88; }
-        }
-
-        .logo-in-clouds-wrap {
+        .logo-stage {
             position: relative;
-            width: 100%;
-            max-width: 440px;
-            margin: 0 auto 10px;
-            padding: 18px 12px 10px;
+            max-width: 380px;
+            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Об'ємні хмарні шари перед і за чорним логотипом */
-        .cloud-puff-back,
-        .cloud-puff-front {
-            position: absolute;
-            pointer-events: none;
-            border-radius: 50%;
-        }
-
-        .cloud-puff-back {
-            inset: 4% 2% 6% 2%;
-            z-index: 1;
-            background:
-                radial-gradient(circle at 32% 46%, rgba(255, 255, 255, 0.95) 0%, rgba(235, 244, 255, 0.78) 38%, rgba(255, 255, 255, 0) 68%),
-                radial-gradient(circle at 68% 42%, rgba(255, 255, 255, 0.92) 0%, rgba(215, 232, 255, 0.72) 40%, rgba(255, 255, 255, 0) 70%),
-                radial-gradient(circle at 50% 72%, rgba(244, 249, 255, 0.94) 0%, rgba(190, 214, 248, 0.65) 46%, rgba(255, 255, 255, 0) 74%);
-            filter: blur(10px);
-            animation: cloudMistDrift1 8.5s ease-in-out infinite;
-        }
-
-        .cloud-puff-front {
-            inset: 42% 0% -4% 0%;
-            z-index: 3;
-            background:
-                radial-gradient(ellipse at 26% 68%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 62%),
-                radial-gradient(ellipse at 74% 64%, rgba(240, 247, 255, 0.72) 0%, rgba(255, 255, 255, 0) 64%);
-            filter: blur(12px);
-            animation: cloudMistDrift2 9.5s ease-in-out infinite;
-        }
-
-        .vector-black-logo {
-            position: relative;
-            z-index: 2;
+        .logo-img {
             width: 100%;
-            max-width: 370px;
+            max-width: 350px;
             height: auto;
             display: block;
-            filter: drop-shadow(0 12px 18px rgba(13, 24, 52, 0.34));
-            animation: droneFloat3D 5.2s ease-in-out infinite;
+            -webkit-mask-image: radial-gradient(ellipse 76% 76% at 50% 50%, #000 68%, rgba(0, 0, 0, 0) 100%);
+            mask-image: radial-gradient(ellipse 76% 76% at 50% 50%, #000 68%, rgba(0, 0, 0, 0) 100%);
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+            animation: floatLogo3D 5.2s ease-in-out infinite;
         }
 
-        .hero-overlay-content {
-            position: relative;
-            z-index: 4;
+        .hero-box {
             background: var(--glass-strong);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 24px 18px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+            border-radius: 24px;
+            padding: 32px 24px;
+            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
+            animation: heroAppear 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes heroAppear {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .pill {
@@ -284,22 +220,22 @@
             font-weight: 800;
             letter-spacing: 1.2px;
             text-transform: uppercase;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .hero h1 {
-            font-size: clamp(28px, 6.8vw, 48px);
+            font-size: clamp(32px, 7.2vw, 54px);
             font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 12px;
+            line-height: 1.08;
+            margin-bottom: 14px;
             letter-spacing: 0.02em;
             color: #FFFFFF;
         }
 
         .hero p {
             max-width: 580px;
-            margin: 0 auto 24px;
-            font-size: clamp(14.5px, 3.7vw, 16.5px);
+            margin: 0 auto 28px;
+            font-size: clamp(14.5px, 3.7vw, 17px);
             color: var(--text-muted);
             line-height: 1.55;
         }
@@ -776,7 +712,7 @@
             .btn {
                 width: 100%;
             }
-            .hero-open-stage {
+            .hero-stage {
                 transform: none !important;
             }
         }
@@ -785,24 +721,12 @@
 <body>
 
     <canvas id="skyCanvas"></canvas>
-    <div class="sky-atmosphere"></div>
+    <div class="sky-vignette"></div>
     <div class="radar-overlay"></div>
 
     <nav>
         <div class="nav-inner">
-            <a href="#" class="nav-brand">
-                <span class="nav-mini-icon">
-                    <svg viewBox="0 0 100 100" width="24" height="24" fill="none" stroke="#0a0e1a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-                        <ellipse cx="22" cy="34" rx="16" ry="5"/>
-                        <ellipse cx="78" cy="32" rx="16" ry="5"/>
-                        <line x1="22" y1="34" x2="40" y2="50"/>
-                        <line x1="78" y1="32" x2="60" y2="50"/>
-                        <rect x="37" y="25" width="26" height="22" rx="4"/>
-                        <path d="M18 68 L40 54 L84 52 L68 64 L38 74 Z"/>
-                    </svg>
-                </span>
-                <span>CADETS DRONE</span>
-            </a>
+            <a href="#" class="nav-brand">CADETS DRONE</a>
             <div class="nav-links">
                 <a href="#about">Хто ми</a>
                 <a href="#calcs">Калькулятори</a>
@@ -825,72 +749,12 @@
 
     <header class="hero">
         <div class="container">
-            <div class="hero-open-stage" id="hero3DCard">
-                <!-- Без жодного квадрата: прозорий векторний чорний логотип CADETS DRONE у 3D-хмарах -->
-                <div class="logo-in-clouds-wrap">
-                    <div class="cloud-puff-back"></div>
-
-                    <svg class="vector-black-logo" viewBox="0 0 640 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CADETS DRONE">
-                        <g fill="none" stroke="#080b12" stroke-linecap="round" stroke-linejoin="round">
-                            <!-- Лівий пропелер і мотор -->
-                            <ellipse cx="145" cy="186" rx="88" ry="11" stroke-width="6.5" transform="rotate(-4 145 186)"/>
-                            <path d="M132 186 L158 186 L156 212 L134 212 Z" stroke-width="6"/>
-                            <path d="M128 214 L164 214 L160 226 L132 226 Z" stroke-width="5.5"/>
-                            <!-- Лівий промінь рами -->
-                            <path d="M158 222 L248 242 M162 232 L245 252" stroke-width="6.5"/>
-
-                            <!-- Акумуляторний блок зверху -->
-                            <path d="M236 112 L348 92 L364 196 L252 216 Z" stroke-width="7"/>
-                            <line x1="274" y1="105" x2="290" y2="209" stroke-width="5.5"/>
-                            <line x1="312" y1="98" x2="328" y2="202" stroke-width="5.5"/>
-                            <!-- Стяжка / ручка зверху АКБ -->
-                            <path d="M276 102 C276 74, 314 68, 322 95" stroke-width="6.5"/>
-                            <path d="M286 98 L286 78 L306 75 L306 95" stroke-width="5"/>
-
-                            <!-- Антена VTX / ELRS праворуч вгору -->
-                            <path d="M446 205 C456 155, 456 105, 448 56" stroke-width="6.5"/>
-                            <path d="M436 38 L458 35 L461 55 L439 58 Z" stroke-width="6"/>
-
-                            <!-- Центральний мотор і пропелер -->
-                            <ellipse cx="395" cy="168" rx="92" ry="11" stroke-width="6.5" transform="rotate(-8 395 168)"/>
-                            <path d="M382 168 L408 168 L406 195 L384 195 Z" stroke-width="6"/>
-                            <path d="M376 196 L414 196 L410 212 L380 212 Z" stroke-width="5.5"/>
-
-                            <!-- Правий пропелер і мотор -->
-                            <ellipse cx="520" cy="184" rx="86" ry="10.5" stroke-width="6.5" transform="rotate(-3 520 184)"/>
-                            <path d="M507 184 L533 184 L531 208 L509 208 Z" stroke-width="6"/>
-                            <path d="M442 222 L512 208 M446 232 L516 218" stroke-width="6"/>
-
-                            <!-- Корпус дрон-платформи та підвісний боєприпас -->
-                            <path d="M244 226 L444 202 L462 232 L252 258 Z" stroke-width="6.5"/>
-                            <!-- Хвостовий стабілізатор ліворуч -->
-                            <path d="M62 342 L252 260 L264 316 L66 352 Z" stroke-width="7"/>
-                            <!-- Основний корпус / циліндр скиду -->
-                            <path d="M254 256 C330 242, 412 230, 496 226 L516 266 C432 288, 348 310, 266 322 Z" stroke-width="7.5"/>
-                            <!-- Хомути кріплення та нижній підвіс -->
-                            <path d="M286 244 C276 286, 282 326, 298 352" stroke-width="6"/>
-                            <path d="M326 238 C316 282, 322 322, 338 348" stroke-width="6"/>
-                            <path d="M412 226 C404 264, 410 296, 424 316" stroke-width="6"/>
-                            <path d="M276 346 L378 326 L384 348 L284 366 Z" stroke-width="6.5"/>
-                            <!-- Носова частина та дроти детонатора -->
-                            <ellipse cx="508" cy="246" rx="14" ry="22" transform="rotate(-14 508 246)" stroke-width="6.5"/>
-                            <path d="M520 244 L544 238 M524 252 C558 246, 596 254, 586 276 C576 292, 514 276, 474 282 C438 288, 404 318, 386 334" stroke-width="5.5"/>
-                        </g>
-
-                        <!-- Чіткий чорний напис CADETS DRONE без фону -->
-                        <text x="320" y="458"
-                              text-anchor="middle"
-                              fill="#080b12"
-                              font-family="Impact, 'Arial Narrow', 'Segoe UI', sans-serif"
-                              font-size="84"
-                              font-weight="900"
-                              letter-spacing="3">CADETS DRONE</text>
-                    </svg>
-
-                    <div class="cloud-puff-front"></div>
+            <div class="hero-stage" id="hero3DStage">
+                <div class="logo-stage">
+                    <img src="./logo.png" alt="CADETS DRONE" class="logo-img">
                 </div>
 
-                <div class="hero-overlay-content">
+                <div class="hero-box">
                     <div class="pill">Технологічна ініціатива курсантів</div>
                     <h1>CADETS DRONE</h1>
                     <p>
@@ -1355,23 +1219,21 @@
     </footer>
 
     <script>
-        // Інтерактивний 3D-нахил центральної сцени
-        const hero3DCard = document.getElementById('hero3DCard');
-        if (hero3DCard) {
-            hero3DCard.addEventListener('mousemove', (e) => {
+        const hero3DStage = document.getElementById('hero3DStage');
+        if (hero3DStage) {
+            hero3DStage.addEventListener('mousemove', (e) => {
                 if (window.innerWidth <= 640) return;
-                const rect = hero3DCard.getBoundingClientRect();
+                const rect = hero3DStage.getBoundingClientRect();
                 const x = (e.clientX - rect.left) / rect.width - 0.5;
                 const y = (e.clientY - rect.top) / rect.height - 0.5;
-                hero3DCard.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 7}deg)`;
+                hero3DStage.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 7}deg)`;
             });
 
-            hero3DCard.addEventListener('mouseleave', () => {
-                hero3DCard.style.transform = 'rotateY(0deg) rotateX(0deg)';
+            hero3DStage.addEventListener('mouseleave', () => {
+                hero3DStage.style.transform = 'rotateY(0deg) rotateX(0deg)';
             });
         }
 
-        // Генератор детальних багатошарових кучевих 3D-хмар (спрайтова рельєфна фактура)
         const canvas = document.getElementById('skyCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -1391,7 +1253,6 @@
             }
         });
 
-        // Створюємо деталізований спрайт кучевої хмари з об'ємними клубами, світлом зверху та тінню знизу
         function buildDetailedCumulusSprite(seed) {
             const off = document.createElement('canvas');
             off.width = 560;
@@ -1404,244 +1265,8 @@
             }
 
             const lobes = [];
-            // Плоска тіньова основа кучевої хмари
             for (let i = 0; i < 16; i++) {
                 const t = i / 15;
                 const x = 90 + t * 380 + (rand() - 0.5) * 24;
                 const y = 215 + (rand() - 0.5) * 16;
-                const r = 36 + Math.sin(t * Math.PI) * 28 + rand() * 14;
-                lobes.push({ x, y, r, tier: 0 });
-            }
-            // Середній об'ємний пояс
-            for (let i = 0; i < 18; i++) {
-                const t = i / 17;
-                const arch = Math.sin(t * Math.PI);
-                const x = 115 + t * 330 + (rand() - 0.5) * 28;
-                const y = 185 - arch * 42 + (rand() - 0.5) * 22;
-                const r = 34 + arch * 36 + rand() * 16;
-                lobes.push({ x, y, r, tier: 1 });
-            }
-            // Верхні сонячні башти (вершини хмари)
-            for (let i = 0; i < 12; i++) {
-                const t = 0.15 + (i / 11) * 0.7;
-                const arch = Math.sin(t * Math.PI);
-                const x = 140 + t * 280 + (rand() - 0.5) * 26;
-                const y = 145 - arch * 54 + (rand() - 0.5) * 20;
-                const r = 28 + arch * 34 + rand() * 14;
-                lobes.push({ x, y, r, tier: 2 });
-            }
-
-            // Малюємо шарами від темної основи до яскравих верхівок
-            for (const l of lobes) {
-                const g = octx.createRadialGradient(
-                    l.x - l.r * 0.25,
-                    l.y - l.r * 0.35,
-                    l.r * 0.08,
-                    l.x,
-                    l.y + l.r * 0.18,
-                    l.r
-                );
-
-                if (l.tier === 0) {
-                    g.addColorStop(0, 'rgba(176, 200, 236, 0.78)');
-                    g.addColorStop(0.55, 'rgba(116, 148, 204, 0.56)');
-                    g.addColorStop(1, 'rgba(72, 104, 168, 0)');
-                } else if (l.tier === 1) {
-                    g.addColorStop(0, 'rgba(244, 249, 255, 0.88)');
-                    g.addColorStop(0.58, 'rgba(196, 217, 248, 0.62)');
-                    g.addColorStop(1, 'rgba(130, 162, 216, 0)');
-                } else {
-                    g.addColorStop(0, 'rgba(255, 255, 255, 0.96)');
-                    g.addColorStop(0.52, 'rgba(235, 244, 255, 0.72)');
-                    g.addColorStop(1, 'rgba(182, 208, 245, 0)');
-                }
-
-                octx.fillStyle = g;
-                octx.beginPath();
-                octx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
-                octx.fill();
-            }
-
-            return off;
-        }
-
-        function initCloudSprites() {
-            cloudSprites = [
-                buildDetailedCumulusSprite(104729),
-                buildDetailedCumulusSprite(224737),
-                buildDetailedCumulusSprite(350377),
-                buildDetailedCumulusSprite(479909)
-            ];
-        }
-
-        function resizeSky() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-
-        function createCloudInstance(randomX = true) {
-            const layer = Math.random(); // 0 = дальній горизонт, 1 = передній 3D-план
-            const scale = 0.42 + layer * 0.78;
-            return {
-                sprite: cloudSprites[Math.floor(Math.random() * cloudSprites.length)],
-                x: randomX ? Math.random() * (width + 520) - 260 : -520,
-                y: Math.random() * (height * 0.78) - 40,
-                scale,
-                speed: 0.14 + layer * 0.34,
-                depth: 0.25 + layer * 0.95,
-                alpha: 0.42 + layer * 0.48
-            };
-        }
-
-        function initClouds() {
-            clouds3D = [];
-            const count = Math.max(10, Math.floor(width / 115));
-            for (let i = 0; i < count; i++) {
-                clouds3D.push(createCloudInstance(true));
-            }
-            clouds3D.sort((a, b) => a.depth - b.depth);
-        }
-
-        function animateSky() {
-            ctx.clearRect(0, 0, width, height);
-
-            for (const c of clouds3D) {
-                c.x += c.speed;
-                if (c.x > width + 320) {
-                    Object.assign(c, createCloudInstance(false));
-                }
-
-                const drawX = c.x + pointerX * 26 * c.depth;
-                const drawY = c.y + pointerY * 16 * c.depth;
-                const drawW = c.sprite.width * c.scale;
-                const drawH = c.sprite.height * c.scale;
-
-                ctx.save();
-                ctx.globalAlpha = c.alpha;
-                ctx.drawImage(c.sprite, drawX, drawY, drawW, drawH);
-                ctx.restore();
-            }
-
-            requestAnimationFrame(animateSky);
-        }
-
-        window.addEventListener('resize', () => {
-            resizeSky();
-            initClouds();
-        });
-
-        initCloudSprites();
-        resizeSky();
-        initClouds();
-        animateSky();
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        function switchTab(groupSelector, tabId, btn) {
-            const parent = btn.closest('section');
-            parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            parent.querySelectorAll(groupSelector).forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            const target = document.getElementById(tabId);
-            if (target) target.classList.add('active');
-        }
-
-        function calcHorizon() {
-            const h1 = Math.max(0, parseFloat(document.getElementById('hRx').value) || 0);
-            const h2 = Math.max(0, parseFloat(document.getElementById('hDrone').value) || 0);
-            const dist = 3.57 * (Math.sqrt(h1) + Math.sqrt(h2));
-            document.getElementById('resHorizon').innerText = dist.toFixed(2) + ' км';
-            document.getElementById('resHorizonHalf').innerText = (dist * 0.75).toFixed(2) + ' км (з запасом)';
-        }
-
-        function calcBattery() {
-            const capMah = Math.max(100, parseFloat(document.getElementById('batCap').value) || 4200);
-            const cells = parseInt(document.getElementById('batCells').value, 10) || 6;
-            const type = document.getElementById('batType').value;
-            const avgCurrent = Math.max(1, parseFloat(document.getElementById('batCurrent').value) || 25);
-
-            const usableFactor = type === 'lipo' ? 0.78 : 0.85;
-            const usableAh = (capMah / 1000) * usableFactor;
-            const minutes = (usableAh / avgCurrent) * 60;
-            const minVoltCell = type === 'lipo' ? '3.50 В' : '2.85 В';
-
-            document.getElementById('resFlightMin').innerText = minutes.toFixed(1) + ' хв';
-            document.getElementById('resMinVolt').innerText = minVoltCell + ` (${cells}S: ${(cells * parseFloat(minVoltCell)).toFixed(1)} В)`;
-        }
-
-        function calcBallistics() {
-            const h = Math.max(1, parseFloat(document.getElementById('dropAlt').value) || 100);
-            const speedKmh = Math.max(0, parseFloat(document.getElementById('dropSpeed').value) || 35);
-            const g = 9.81;
-            const fallTime = Math.sqrt((2 * h) / g);
-            const speedMs = speedKmh / 3.6;
-            const leadMeters = fallTime * speedMs;
-
-            document.getElementById('resFallTime').innerText = fallTime.toFixed(2) + ' с';
-            document.getElementById('resLeadDist').innerText = leadMeters.toFixed(1) + ' м';
-        }
-
-        function searchFreqTable() {
-            const q = document.getElementById('freqSearch').value.toLowerCase();
-            document.querySelectorAll('#freqTableBody tr').forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-            });
-        }
-
-        function searchErrorsTable() {
-            const q = document.getElementById('errSearch').value.toLowerCase();
-            document.querySelectorAll('#errTableBody tr').forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-            });
-        }
-
-        function toggleCheck(checkbox) {
-            const label = checkbox.closest('.check-item');
-            if (checkbox.checked) {
-                label.classList.add('done');
-            } else {
-                label.classList.remove('done');
-            }
-            saveChecklist();
-        }
-
-        function saveChecklist() {
-            const states = Array.from(document.querySelectorAll('#checklistItems input')).map(cb => cb.checked);
-            localStorage.setItem('cadetsDroneChecklist', JSON.stringify(states));
-        }
-
-        function sendFeedback(e) {
-            e.preventDefault();
-            const topic = document.getElementById('fbTopic').value.trim();
-            const details = document.getElementById('fbDetails').value.trim();
-            if (!topic) return;
-
-            const text = encodeURIComponent(`CADETS DRONE — Пропозиція:\nТема: ${topic}\nДеталі: ${details}`);
-            window.open(`https://t.me/+_0jUe-LIHXM1NzYy?text=${text}`, '_blank');
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            calcHorizon();
-            calcBattery();
-            calcBallistics();
-
-            const saved = JSON.parse(localStorage.getItem('cadetsDroneChecklist') || '[]');
-            const inputs = document.querySelectorAll('#checklistItems input');
-            inputs.forEach((cb, index) => {
-                if (saved[index]) {
-                    cb.checked = true;
-                    cb.closest('.check-item').classList.add('done');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+                const r = 36 + Math.sin(t
