@@ -7,15 +7,15 @@
     <style>
         :root {
             --primary: #334475;
-            --sky-top: #3a5998;
-            --sky-mid: #223769;
-            --sky-bottom: #0d1630;
+            --sky-top: #375796;
+            --sky-mid: #1d315f;
+            --sky-bottom: #0c142c;
             --accent: #94B3FB;
             --text: #FFFFFF;
             --text-muted: #e6eeff;
-            --glass: rgba(11, 18, 38, 0.76);
-            --glass-strong: rgba(10, 16, 35, 0.72);
-            --glass-hover: rgba(20, 32, 66, 0.9);
+            --glass: rgba(11, 18, 38, 0.78);
+            --glass-strong: rgba(9, 15, 34, 0.84);
+            --glass-hover: rgba(20, 32, 66, 0.92);
             --border: rgba(148, 179, 251, 0.35);
         }
 
@@ -37,7 +37,6 @@
             position: relative;
         }
 
-        /* 3D хмарне небо */
         #skyCanvas {
             position: fixed;
             top: 0;
@@ -48,13 +47,12 @@
             pointer-events: none;
         }
 
-        /* Легка атмосферна глибина для читабельності */
         .sky-vignette {
             position: fixed;
             inset: 0;
             z-index: -2;
             pointer-events: none;
-            background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.06) 0%, rgba(7, 12, 26, 0.58) 100%);
+            background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.05) 0%, rgba(7, 12, 26, 0.65) 100%);
         }
 
         @keyframes radarSpin {
@@ -64,14 +62,14 @@
 
         .radar-overlay {
             position: fixed;
-            top: 40%;
+            top: 38%;
             left: 50%;
             width: 140vmax;
             height: 140vmax;
             z-index: -1;
             pointer-events: none;
-            opacity: 0.18;
-            animation: radarSpin 100s linear infinite;
+            opacity: 0.16;
+            animation: radarSpin 105s linear infinite;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000' viewBox='0 0 1000 1000'%3E%3Cg fill='none' stroke='%2394B3FB' stroke-width='1.5'%3E%3Ccircle cx='500' cy='500' r='220'/%3E%3Ccircle cx='500' cy='500' r='380'/%3E%3Ccircle cx='500' cy='500' r='480' stroke-dasharray='6 12'/%3E%3Cline x1='500' y1='20' x2='500' y2='980' stroke-dasharray='8 10'/%3E%3Cline x1='20' y1='500' x2='980' y2='500' stroke-dasharray='8 10'/%3E%3Cline x1='160' y1='160' x2='840' y2='840' stroke-dasharray='8 10'/%3E%3Cline x1='840' y1='160' x2='160' y2='840' stroke-dasharray='8 10'/%3E%3C/g%3E%3C/svg%3E");
             background-size: contain;
             background-repeat: no-repeat;
@@ -81,7 +79,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(10, 16, 34, 0.88);
+            background: rgba(10, 16, 34, 0.9);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border-bottom: 1px solid var(--border);
@@ -108,16 +106,6 @@
             font-size: 15px;
         }
 
-        .nav-logo-badge {
-            height: 36px;
-            width: auto;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.92);
-            padding: 3px 6px;
-            display: none;
-            object-fit: contain;
-        }
-
         .nav-links {
             display: flex;
             gap: 18px;
@@ -140,7 +128,7 @@
             gap: 8px;
             overflow-x: auto;
             padding: 8px 16px;
-            background: rgba(10, 16, 34, 0.82);
+            background: rgba(10, 16, 34, 0.84);
             border-bottom: 1px solid var(--border);
             scrollbar-width: none;
         }
@@ -161,11 +149,12 @@
             border: 1px solid rgba(148, 179, 251, 0.28);
         }
 
-        /* Головний блок з логотипом у хмарах */
+        /* Сучасний 3D-блок з логотипом у хмарах */
         .hero {
             padding: 28px 16px 56px;
             text-align: center;
             border-bottom: 1px solid var(--border);
+            perspective: 1100px;
         }
 
         .container {
@@ -173,16 +162,18 @@
             margin: 0 auto;
         }
 
-        .hero-cloud-stage {
+        .hero-motion-card {
             position: relative;
             max-width: 820px;
             margin: 0 auto;
             border-radius: 28px;
-            padding: 28px 20px 34px;
-            background: radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.92) 0%, rgba(226, 236, 255, 0.78) 44%, rgba(12, 20, 44, 0.84) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.45);
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            padding: 24px 18px 28px;
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.16) 0%, rgba(148, 179, 251, 0.08) 45%, rgba(9, 15, 34, 0.88) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 25px 65px rgba(0, 0, 0, 0.5);
             overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.22s ease-out, box-shadow 0.25s ease;
             animation: heroAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
@@ -191,45 +182,77 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @keyframes floatInClouds {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-8px) scale(1.015); }
+        @keyframes droneDrift3D {
+            0%, 100% {
+                transform: translate3d(0px, 0px, 24px) rotateZ(-0.6deg);
+            }
+            50% {
+                transform: translate3d(4px, -11px, 36px) rotateZ(0.8deg);
+            }
         }
 
-        .cloud-logo-box {
+        @keyframes cloudLayerSlideLeft {
+            0%, 100% { transform: translateX(-14px) translateY(0px); }
+            50% { transform: translateX(16px) translateY(-6px); }
+        }
+
+        @keyframes cloudLayerSlideRight {
+            0%, 100% { transform: translateX(14px) translateY(0px); }
+            50% { transform: translateX(-16px) translateY(6px); }
+        }
+
+        .cloud-logo-stage {
             position: relative;
-            margin: 0 auto 14px;
-            max-width: 300px;
-            min-height: 170px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: floatInClouds 5s ease-in-out infinite;
+            max-width: 340px;
+            margin: 0 auto 20px;
+            padding: 10px;
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42), 0 0 32px rgba(148, 179, 251, 0.22);
         }
 
-        #cleanBlackLogoCanvas {
-            max-width: 260px;
-            width: 82%;
+        .cloud-logo-stage::before,
+        .cloud-logo-stage::after {
+            content: "";
+            position: absolute;
+            inset: -18px;
+            pointer-events: none;
+            border-radius: 50%;
+            filter: blur(18px);
+            z-index: 2;
+        }
+
+        .cloud-logo-stage::before {
+            background: radial-gradient(circle at 22% 78%, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 58%);
+            animation: cloudLayerSlideLeft 8s ease-in-out infinite;
+        }
+
+        .cloud-logo-stage::after {
+            background: radial-gradient(circle at 82% 28%, rgba(215, 232, 255, 0.28) 0%, rgba(255, 255, 255, 0) 60%);
+            animation: cloudLayerSlideRight 9.5s ease-in-out infinite;
+        }
+
+        .cloud-logo-img {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 320px;
             height: auto;
-            display: none;
-            filter: drop-shadow(0 10px 18px rgba(15, 24, 52, 0.28));
-        }
-
-        #cleanNavLogoCanvas {
-            height: 30px;
-            width: auto;
-            display: none;
+            display: block;
+            margin: 0 auto;
+            border-radius: 20px;
+            animation: droneDrift3D 5.2s ease-in-out infinite;
         }
 
         .hero-overlay-content {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             background: var(--glass-strong);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 24px 18px;
+            padding: 22px 18px;
         }
 
         .pill {
@@ -735,6 +758,9 @@
             .btn {
                 width: 100%;
             }
+            .hero-motion-card {
+                transform: none !important;
+            }
         }
     </style>
 </head>
@@ -747,7 +773,6 @@
     <nav>
         <div class="nav-inner">
             <a href="#" class="nav-brand">
-                <canvas id="cleanNavLogoCanvas" class="nav-logo-badge"></canvas>
                 <span>CADETS DRONE</span>
             </a>
             <div class="nav-links">
@@ -772,9 +797,42 @@
 
     <header class="hero">
         <div class="container">
-            <div class="hero-cloud-stage">
-                <div class="cloud-logo-box">
-                    <canvas id="cleanBlackLogoCanvas"></canvas>
+            <div class="hero-motion-card" id="hero3DCard">
+                <div class="cloud-logo-stage">
+                    <img src="./logo-3d-clouds.jpg" alt="CADETS DRONE у 3D-хмарах" class="cloud-logo-img"
+                         onerror="this.style.display='none'; document.getElementById('fallbackCloudSvg').style.display='block';">
+                    <svg id="fallbackCloudSvg" viewBox="0 0 600 600" style="display:none; width:100%; height:auto; border-radius:20px;">
+                        <defs>
+                            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#3c67a8"/>
+                                <stop offset="55%" stop-color="#7fa4d9"/>
+                                <stop offset="100%" stop-color="#d7e5f7"/>
+                            </linearGradient>
+                            <radialGradient id="cloudLit" cx="35%" cy="30%" r="70%">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="65%" stop-color="#eef4fc"/>
+                                <stop offset="100%" stop-color="#9cb7de"/>
+                            </radialGradient>
+                        </defs>
+                        <rect width="600" height="600" fill="url(#skyGrad)"/>
+                        <circle cx="170" cy="240" r="95" fill="url(#cloudLit)" opacity="0.92"/>
+                        <circle cx="255" cy="205" r="115" fill="url(#cloudLit)" opacity="0.95"/>
+                        <circle cx="355" cy="235" r="100" fill="url(#cloudLit)" opacity="0.9"/>
+                        <circle cx="130" cy="460" r="120" fill="url(#cloudLit)" opacity="0.85"/>
+                        <circle cx="270" cy="475" r="140" fill="url(#cloudLit)" opacity="0.9"/>
+                        <circle cx="435" cy="450" r="130" fill="url(#cloudLit)" opacity="0.88"/>
+                        <g fill="none" stroke="#090c14" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+                            <ellipse cx="130" cy="215" rx="75" ry="18"/>
+                            <ellipse cx="450" cy="205" rx="78" ry="18"/>
+                            <line x1="130" y1="215" x2="230" y2="295"/>
+                            <line x1="450" y1="205" x2="355" y2="290"/>
+                            <rect x="220" y="150" width="135" height="125" rx="14"/>
+                            <line x1="435" y1="265" x2="465" y2="95"/>
+                            <circle cx="466" cy="82" r="14"/>
+                            <path d="M120 385 L225 320 L495 310 L425 365 L235 415 Z"/>
+                        </g>
+                        <text x="300" y="535" text-anchor="middle" fill="#090c14" font-size="68" font-weight="900" letter-spacing="3">CADETS DRONE</text>
+                    </svg>
                 </div>
 
                 <div class="hero-overlay-content">
@@ -1242,86 +1300,23 @@
     </footer>
 
     <script>
-        // 1. Обробка логотипа: прибираємо білий фон та малюємо чистий чорний силует без квадрата
-        function buildBlackLogoFromImage(imgEl) {
-            const tempCanvas = document.createElement('canvas');
-            const tCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = imgEl.naturalWidth;
-            tempCanvas.height = imgEl.naturalHeight;
-            tCtx.drawImage(imgEl, 0, 0);
+        // Інтерактивний 3D-нахил картки при русі миші / гіроскопа
+        const hero3DCard = document.getElementById('hero3DCard');
+        if (hero3DCard) {
+            hero3DCard.addEventListener('mousemove', (e) => {
+                if (window.innerWidth <= 640) return;
+                const rect = hero3DCard.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                hero3DCard.style.transform = `rotateY(${x * 9}deg) rotateX(${-y * 8}deg)`;
+            });
 
-            const imgData = tCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            const data = imgData.data;
-
-            // Перетворюємо світлі пікселі (фон і білий контур) у прозорість/чорний контур залежно від яскравості
-            for (let i = 0; i < data.length; i += 4) {
-                const r = data[i];
-                const g = data[i + 1];
-                const b = data[i + 2];
-                const a = data[i + 3];
-
-                if (a < 15) {
-                    data[i + 3] = 0;
-                    continue;
-                }
-
-                const brightness = (r + g + b) / 3;
-                // Якщо картинка вже чорна на білому: темні лінії стають чорними, білий фон — прозорим
-                if (brightness < 235) {
-                    const alphaStrength = Math.min(255, Math.round((235 - brightness) * 2.2));
-                    data[i] = 10;
-                    data[i + 1] = 14;
-                    data[i + 2] = 24;
-                    data[i + 3] = Math.min(a, alphaStrength);
-                } else {
-                    data[i + 3] = 0;
-                }
-            }
-
-            tCtx.putImageData(imgData, 0, 0);
-
-            const heroCanvas = document.getElementById('cleanBlackLogoCanvas');
-            heroCanvas.width = tempCanvas.width;
-            heroCanvas.height = tempCanvas.height;
-            const hCtx = heroCanvas.getContext('2d');
-            hCtx.drawImage(tempCanvas, 0, 0);
-            heroCanvas.style.display = 'block';
-
-            const navCanvas = document.getElementById('cleanNavLogoCanvas');
-            navCanvas.width = tempCanvas.width;
-            navCanvas.height = tempCanvas.height;
-            const nCtx = navCanvas.getContext('2d');
-            nCtx.drawImage(tempCanvas, 0, 0);
-            navCanvas.style.display = 'inline-block';
+            hero3DCard.addEventListener('mouseleave', () => {
+                hero3DCard.style.transform = 'rotateY(0deg) rotateX(0deg)';
+            });
         }
 
-        function loadLogoSources() {
-            const candidates = ['./logo.png', './logo.png.png'];
-            let idx = 0;
-
-            function tryNext() {
-                if (idx >= candidates.length) return;
-                const probe = new Image();
-                probe.crossOrigin = 'anonymous';
-                probe.onload = function () {
-                    if (probe.naturalWidth > 0) {
-                        buildBlackLogoFromImage(probe);
-                    } else {
-                        idx++;
-                        tryNext();
-                    }
-                };
-                probe.onerror = function () {
-                    idx++;
-                    tryNext();
-                };
-                probe.src = candidates[idx] + '?v=' + Date.now();
-            }
-
-            tryNext();
-        }
-
-        // 2. Об'ємні 3D-хмари з паралаксом
+        // Об'ємні 3D-хмари на фоні з паралаксом
         const canvas = document.getElementById('skyCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -1333,13 +1328,20 @@
             pointerY = (e.clientY / window.innerHeight - 0.5) * 2;
         });
 
+        window.addEventListener('deviceorientation', (e) => {
+            if (e.gamma !== null && e.beta !== null) {
+                pointerX = Math.max(-1, Math.min(1, e.gamma / 30));
+                pointerY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+            }
+        });
+
         function resizeSky() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
         }
 
         function create3DCloud(randomX = true) {
-            const layer = Math.random(); // 0..0.45 дальній шар, 0.45..1 ближній 3D шар
+            const layer = Math.random();
             const scale = 0.65 + layer * 0.85;
             const puffs = [];
             const puffCount = 7 + Math.floor(Math.random() * 5);
@@ -1356,7 +1358,7 @@
             return {
                 x: randomX ? Math.random() * (width + 400) - 200 : -320,
                 y: Math.random() * (height * 0.88),
-                speed: (0.18 + layer * 0.35),
+                speed: 0.22 + layer * 0.38,
                 depth: 0.3 + layer * 0.9,
                 alpha: 0.16 + layer * 0.22,
                 puffs
@@ -1381,14 +1383,13 @@
                     Object.assign(cloud, create3DCloud(false));
                 }
 
-                const pxBase = cloud.x + pointerX * 18 * cloud.depth;
-                const pyBase = cloud.y + pointerY * 12 * cloud.depth;
+                const pxBase = cloud.x + pointerX * 22 * cloud.depth;
+                const pyBase = cloud.y + pointerY * 14 * cloud.depth;
 
                 for (let p of cloud.puffs) {
                     const px = pxBase + p.dx;
                     const py = pyBase + p.dy;
 
-                    // 3D світлотінь: яскравий верх, м'який блакитний об'єм і тінь знизу
                     const grad = ctx.createRadialGradient(
                         px - p.r * 0.25,
                         py - p.r * 0.35,
@@ -1515,7 +1516,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            loadLogoSources();
             calcHorizon();
             calcBattery();
             calcBallistics();
