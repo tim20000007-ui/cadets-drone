@@ -1269,4 +1269,236 @@
                 const t = i / 15;
                 const x = 90 + t * 380 + (rand() - 0.5) * 24;
                 const y = 215 + (rand() - 0.5) * 16;
-                const r = 36 + Math.sin(t
+                const r = 36 + Math.sin(t * Math.PI) * 28 + rand() * 14;
+                lobes.push({ x, y, r, tier: 0 });
+            }
+            for (let i = 0; i < 18; i++) {
+                const t = i / 17;
+                const arch = Math.sin(t * Math.PI);
+                const x = 115 + t * 330 + (rand() - 0.5) * 28;
+                const y = 185 - arch * 42 + (rand() - 0.5) * 22;
+                const r = 34 + arch * 36 + rand() * 16;
+                lobes.push({ x, y, r, tier: 1 });
+            }
+            for (let i = 0; i < 12; i++) {
+                const t = 0.15 + (i / 11) * 0.7;
+                const arch = Math.sin(t * Math.PI);
+                const x = 140 + t * 280 + (rand() - 0.5) * 26;
+                const y = 145 - arch * 54 + (rand() - 0.5) * 20;
+                const r = 28 + arch * 34 + rand() * 14;
+                lobes.push({ x, y, r, tier: 2 });
+            }
+
+            for (const l of lobes) {
+                const g = octx.createRadialGradient(
+                    l.x - l.r * 0.25,
+                    l.y - l.r * 0.35,
+                    l.r * 0.08,
+                    l.x,
+                    l.y + l.r * 0.18,
+                    l.r
+                );
+
+                if (l.tier === 0) {
+                    g.addColorStop(0, 'rgba(186, 208, 242, 0.85)');
+                    g.addColorStop(0.55, 'rgba(128, 160, 214, 0.62)');
+                    g.addColorStop(1, 'rgba(72, 104, 168, 0)');
+                } else if (l.tier === 1) {
+                    g.addColorStop(0, 'rgba(248, 252, 255, 0.92)');
+                    g.addColorStop(0.58, 'rgba(206, 226, 252, 0.68)');
+                    g.addColorStop(1, 'rgba(130, 162, 216, 0)');
+                } else {
+                    g.addColorStop(0, 'rgba(255, 255, 255, 0.98)');
+                    g.addColorStop(0.52, 'rgba(240, 247, 255, 0.78)');
+                    g.addColorStop(1, 'rgba(182, 208, 245, 0)');
+                }
+
+                octx.fillStyle = g;
+                octx.beginPath();
+                octx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+                octx.fill();
+            }
+
+            return off;
+        }
+
+        function initCloudSprites() {
+            cloudSprites = [
+                buildDetailedCumulusSprite(104729),
+                buildDetailedCumulusSprite(224737),
+                buildDetailedCumulusSprite(350377),
+                buildDetailedCumulusSprite(479909)
+            ];
+        }
+
+        function resizeSky() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        function createCloudInstance(randomX = true) {
+            const layer = Math.random();
+            const scale = 0.45 + layer * 0.85;
+            return {
+                sprite: cloudSprites[Math.floor(Math.random() * cloudSprites.length)],
+                x: randomX ? Math.random() * (width + 520) - 260 : -520,
+                y: Math.random() * (height * 0.72) - 40,
+                scale,
+                speed: 0.14 + layer * 0.34,
+                depth: 0.25 + layer * 0.95,
+                alpha: 0.5 + layer * 0.48
+            };
+        }
+
+        function initClouds() {
+            clouds3D = [];
+            const count = Math.max(12, Math.floor(width / 105));
+            for (let i = 0; i < count; i++) {
+                clouds3D.push(createCloudInstance(true));
+            }
+            clouds3D.sort((a, b) => a.depth - b.depth);
+        }
+
+        function animateSky() {
+            ctx.clearRect(0, 0, width, height);
+
+            for (const c of clouds3D) {
+                c.x += c.speed;
+                if (c.x > width + 320) {
+                    Object.assign(c, createCloudInstance(false));
+                }
+
+                const drawX = c.x + pointerX * 26 * c.depth;
+                const drawY = c.y + pointerY * 16 * c.depth;
+                const drawW = c.sprite.width * c.scale;
+                const drawH = c.sprite.height * c.scale;
+
+                ctx.save();
+                ctx.globalAlpha = c.alpha;
+                ctx.drawImage(c.sprite, drawX, drawY, drawW, drawH);
+                ctx.restore();
+            }
+
+            requestAnimationFrame(animateSky);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeSky();
+            initClouds();
+        });
+
+        initCloudSprites();
+        resizeSky();
+        initClouds();
+        animateSky();
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        function switchTab(groupSelector, tabId, btn) {
+            const parent = btn.closest('section');
+            parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            parent.querySelectorAll(groupSelector).forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const target = document.getElementById(tabId);
+            if (target) target.classList.add('active');
+        }
+
+        function calcHorizon() {
+            const h1 = Math.max(0, parseFloat(document.getElementById('hRx').value) || 0);
+            const h2 = Math.max(0, parseFloat(document.getElementById('hDrone').value) || 0);
+            const dist = 3.57 * (Math.sqrt(h1) + Math.sqrt(h2));
+            document.getElementById('resHorizon').innerText = dist.toFixed(2) + ' км';
+            document.getElementById('resHorizonHalf').innerText = (dist * 0.75).toFixed(2) + ' км (з запасом)';
+        }
+
+        function calcBattery() {
+            const capMah = Math.max(100, parseFloat(document.getElementById('batCap').value) || 4200);
+            const cells = parseInt(document.getElementById('batCells').value, 10) || 6;
+            const type = document.getElementById('batType').value;
+            const avgCurrent = Math.max(1, parseFloat(document.getElementById('batCurrent').value) || 25);
+
+            const usableFactor = type === 'lipo' ? 0.78 : 0.85;
+            const usableAh = (capMah / 1000) * usableFactor;
+            const minutes = (usableAh / avgCurrent) * 60;
+            const minVoltCell = type === 'lipo' ? '3.50 В' : '2.85 В';
+
+            document.getElementById('resFlightMin').innerText = minutes.toFixed(1) + ' хв';
+            document.getElementById('resMinVolt').innerText = minVoltCell + ` (${cells}S: ${(cells * parseFloat(minVoltCell)).toFixed(1)} В)`;
+        }
+
+        function calcBallistics() {
+            const h = Math.max(1, parseFloat(document.getElementById('dropAlt').value) || 100);
+            const speedKmh = Math.max(0, parseFloat(document.getElementById('dropSpeed').value) || 35);
+            const g = 9.81;
+            const fallTime = Math.sqrt((2 * h) / g);
+            const speedMs = speedKmh / 3.6;
+            const leadMeters = fallTime * speedMs;
+
+            document.getElementById('resFallTime').innerText = fallTime.toFixed(2) + ' с';
+            document.getElementById('resLeadDist').innerText = leadMeters.toFixed(1) + ' м';
+        }
+
+        function searchFreqTable() {
+            const q = document.getElementById('freqSearch').value.toLowerCase();
+            document.querySelectorAll('#freqTableBody tr').forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+
+        function searchErrorsTable() {
+            const q = document.getElementById('errSearch').value.toLowerCase();
+            document.querySelectorAll('#errTableBody tr').forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+
+        function toggleCheck(checkbox) {
+            const label = checkbox.closest('.check-item');
+            if (checkbox.checked) {
+                label.classList.add('done');
+            } else {
+                label.classList.remove('done');
+            }
+            saveChecklist();
+        }
+
+        function saveChecklist() {
+            const states = Array.from(document.querySelectorAll('#checklistItems input')).map(cb => cb.checked);
+            localStorage.setItem('cadetsDroneChecklist', JSON.stringify(states));
+        }
+
+        function sendFeedback(e) {
+            e.preventDefault();
+            const topic = document.getElementById('fbTopic').value.trim();
+            const details = document.getElementById('fbDetails').value.trim();
+            if (!topic) return;
+
+            const text = encodeURIComponent(`CADETS DRONE — Пропозиція:\nТема: ${topic}\nДеталі: ${details}`);
+            window.open(`https://t.me/+_0jUe-LIHXM1NzYy?text=${text}`, '_blank');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            calcHorizon();
+            calcBattery();
+            calcBallistics();
+
+            const saved = JSON.parse(localStorage.getItem('cadetsDroneChecklist') || '[]');
+            const inputs = document.querySelectorAll('#checklistItems input');
+            inputs.forEach((cb, index) => {
+                if (saved[index]) {
+                    cb.checked = true;
+                    cb.closest('.check-item').classList.add('done');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
