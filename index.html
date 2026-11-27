@@ -1,698 +1,689 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CADETS DRONE — Технологічний проєкт БпЛА</title>
     <style>
+        @font-face {
+            font-family: 'UAF Sans NameTape';
+            src: url('./UAFSans-NameTape.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             --primary: #334475;
             --accent: #94B3FB;
             --text: #FFFFFF;
             --black: #000000;
-            --text-muted: #e9f0ff;
-            --glass: rgba(11, 18, 38, 0.78);
-            --glass-strong: rgba(10, 16, 35, 0.86);
-            --glass-hover: rgba(20, 32, 66, 0.92);
-            --border: rgba(148, 179, 251, 0.35);
+            --muted: #dce6ff;
+            --card: #121b36;
+            --card-soft: #1a264a;
+            --border: rgba(148, 179, 251, 0.28);
+            --font-main: 'UAF Sans NameTape', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
-            scroll-behavior: smooth;
-            -webkit-tap-highlight-color: transparent;
+            font-family: var(--font-main);
+            font-feature-settings: "liga" 1, "kern" 1, "locl" 1;
         }
 
         body {
-            background: linear-gradient(180deg, #3c69b5 0%, #75a2e3 28%, #253d75 68%, #0a1126 100%);
+            background: linear-gradient(180deg, #334475 0%, #15203f 40%, #090e1d 100%);
             color: var(--text);
             line-height: 1.6;
-            overflow-x: hidden;
             min-height: 100vh;
-            position: relative;
-        }
-
-        #skyCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -3;
-            pointer-events: none;
-        }
-
-        .sky-vignette {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            pointer-events: none;
-            background:
-                radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 56%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(7, 11, 24, 0.78) 100%);
-        }
-
-        @keyframes radarSpin {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .radar-overlay {
-            position: fixed;
-            top: 42%;
-            left: 50%;
-            width: 140vmax;
-            height: 140vmax;
-            z-index: -1;
-            pointer-events: none;
-            opacity: 0.11;
-            animation: radarSpin 115s linear infinite;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000' viewBox='0 0 1000 1000'%3E%3Cg fill='none' stroke='%2394B3FB' stroke-width='1.5'%3E%3Ccircle cx='500' cy='500' r='220'/%3E%3Ccircle cx='500' cy='500' r='380'/%3E%3Ccircle cx='500' cy='500' r='480' stroke-dasharray='6 12'/%3E%3Cline x1='500' y1='20' x2='500' y2='980' stroke-dasharray='8 10'/%3E%3Cline x1='20' y1='500' x2='980' y2='500' stroke-dasharray='8 10'/%3E%3Cline x1='160' y1='160' x2='840' y2='840' stroke-dasharray='8 10'/%3E%3Cline x1='840' y1='160' x2='160' y2='840' stroke-dasharray='8 10'/%3E%3C/g%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-        }
-
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(10, 16, 34, 0.88);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 18px;
-        }
-
-        .nav-inner {
-            max-width: 1120px;
-            margin: 0 auto;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-brand {
-            text-decoration: none;
-            color: var(--text);
-            font-weight: 800;
-            letter-spacing: 1px;
-            font-size: 15px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 18px;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .mobile-nav {
-            display: none;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 8px 16px;
-            background: rgba(10, 16, 34, 0.84);
-            border-bottom: 1px solid var(--border);
-            scrollbar-width: none;
-        }
-
-        .mobile-nav::-webkit-scrollbar {
-            display: none;
-        }
-
-        .mobile-nav a {
-            white-space: nowrap;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent);
-            text-decoration: none;
-            padding: 6px 12px;
-            border-radius: 999px;
-            background: rgba(148, 179, 251, 0.14);
-            border: 1px solid rgba(148, 179, 251, 0.28);
-        }
-
-        .hero {
-            padding: 28px 16px 64px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            perspective: 1100px;
+            flex-direction: column;
         }
 
         .container {
             max-width: 1120px;
             margin: 0 auto;
+            padding: 0 16px;
+            width: 100%;
         }
 
-        .hero-stage {
-            max-width: 780px;
-            margin: 0 auto;
-            transform-style: preserve-3d;
-            transition: transform 0.2s ease-out;
+        /* Навігація по розділах */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(9, 14, 29, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
         }
 
-        @keyframes floatDroneBadge {
-            0%, 100% {
-                transform: translate3d(0px, 0px, 24px) rotateZ(-0.6deg);
-            }
-            50% {
-                transform: translate3d(4px, -10px, 36px) rotateZ(0.7deg);
-            }
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
         }
 
-        .drone-emblem {
-            max-width: 340px;
-            margin: 0 auto 16px;
-            animation: floatDroneBadge 5.2s ease-in-out infinite;
-            filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28));
+        .brand {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 900;
+            letter-spacing: 1.2px;
+            font-size: 18px;
+            cursor: pointer;
         }
 
-        .drone-emblem svg {
+        .nav-menu {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid transparent;
+            padding: 8px 13px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            color: var(--text);
+            background: rgba(148, 179, 251, 0.12);
+        }
+
+        .nav-btn.active {
+            background: var(--accent);
+            color: var(--black);
+            border-color: var(--accent);
+        }
+
+        main {
+            flex: 1;
+            padding: 32px 0 56px;
+        }
+
+        /* Перемикання сторінок-розділів */
+        .page-view {
+            display: none;
+        }
+
+        .page-view.active {
+            display: block;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .page-header h1, .page-header h2 {
+            font-size: clamp(26px, 5vw, 40px);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: 0.5px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            max-width: 680px;
+            margin-top: 8px;
+            font-size: 15.5px;
+        }
+
+        /* Картки та сітки */
+        .hero-banner {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 26px;
+            margin-bottom: 24px;
+        }
+
+        .hero-logo-wrap {
+            margin-bottom: 18px;
+        }
+
+        .hero-logo-img {
+            max-width: 240px;
             width: 100%;
             height: auto;
             display: block;
-            overflow: visible;
-        }
-
-        .hero-box {
-            background: var(--glass-strong);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 34px 24px;
-            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
-            animation: heroAppear 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes heroAppear {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            filter: brightness(0) saturate(100%);
         }
 
         .pill {
             display: inline-block;
-            padding: 6px 14px;
+            padding: 5px 14px;
             border-radius: 999px;
-            background: rgba(148, 179, 251, 0.18);
+            background: rgba(148, 179, 251, 0.15);
             border: 1px solid var(--accent);
             color: var(--accent);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
+            font-size: 12px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.8px;
             margin-bottom: 14px;
         }
 
-        .hero h1 {
-            font-size: clamp(32px, 7.2vw, 54px);
+        .hero-banner h1 {
+            font-size: clamp(32px, 6vw, 52px);
             font-weight: 900;
-            line-height: 1.08;
-            margin-bottom: 14px;
-            letter-spacing: 0.02em;
-            color: var(--text);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
         }
 
-        .hero p {
-            max-width: 580px;
-            margin: 0 auto 28px;
-            font-size: clamp(14.5px, 3.7vw, 17px);
-            color: var(--text-muted);
-            line-height: 1.55;
+        .hero-banner p {
+            color: var(--muted);
+            max-width: 660px;
+            font-size: 16px;
+            margin-bottom: 24px;
         }
 
-        .btn-group {
+        .btn-row {
             display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
             gap: 12px;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(148, 179, 251, 0.45); }
-            50% { box-shadow: 0 0 0 8px rgba(148, 179, 251, 0); }
+            flex-wrap: wrap;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 15px 26px;
-            border-radius: 14px;
-            font-size: 15px;
+            gap: 8px;
+            padding: 13px 22px;
+            border-radius: 12px;
+            font-size: 14.5px;
             font-weight: 800;
             text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-            cursor: pointer;
             border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
 
-        .btn:active {
-            transform: scale(0.97);
+        .btn:hover {
+            opacity: 0.92;
         }
 
         .btn-accent {
             background: var(--accent);
-            color: #0b132b;
-            animation: pulseGlow 2.8s infinite;
+            color: var(--black);
         }
 
-        .btn-glass {
-            background: rgba(51, 68, 117, 0.72);
+        .btn-primary {
+            background: var(--primary);
             color: var(--text);
             border: 1px solid var(--accent);
         }
 
-        .btn-glass:hover {
-            background: rgba(51, 68, 117, 0.95);
-        }
-
-        .btn-subtle {
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 10px;
             background: rgba(148, 179, 251, 0.14);
             color: var(--accent);
             border: 1px solid var(--border);
-            padding: 10px 16px;
-            font-size: 13px;
-            border-radius: 11px;
+            font-weight: 700;
+            cursor: pointer;
         }
 
-        .btn-subtle:hover {
-            background: rgba(148, 179, 251, 0.24);
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
         }
 
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.65s ease-out, transform 0.65s ease-out;
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
         }
 
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
         }
 
-        section {
-            padding: 56px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .section-header {
-            margin-bottom: 28px;
-        }
-
-        .section-tag {
+        .box h3 {
             color: var(--accent);
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            display: block;
-            margin-bottom: 6px;
+            font-size: 18px;
+            margin-bottom: 10px;
         }
 
-        .section-header h2 {
-            font-size: clamp(24px, 5vw, 34px);
-            font-weight: 800;
+        .box p {
+            color: var(--muted);
+            font-size: 14.5px;
+            margin-bottom: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-card {
+            background: #0b1124;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 20px;
             color: var(--text);
         }
 
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-            gap: 20px;
-            align-items: stretch;
-        }
-
-        .about-box, .card, .tool-panel {
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 24px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-            transition: transform 0.25s, background 0.25s, border-color 0.25s;
-        }
-
-        .card:hover, .about-box:hover {
-            background: var(--glass-hover);
-            border-color: var(--accent);
-        }
-
-        .about-box h3, .tool-panel h3 {
-            font-size: 19px;
-            margin-bottom: 12px;
+        .stat-card span {
+            font-size: 12px;
             color: var(--accent);
         }
 
-        .about-box p {
-            color: #eef3ff;
-            font-size: 15px;
-            margin-bottom: 14px;
+        /* Галерея фото на головній */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 14px;
         }
 
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 18px;
+        .photo-slot {
+            background: #0b1124;
+            border: 1px dashed var(--accent);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .photo-frame {
+            aspect-ratio: 4 / 3;
+            background: rgba(51, 68, 117, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-placeholder {
+            text-align: center;
+            padding: 16px;
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .photo-caption {
+            padding: 12px 14px;
+            font-size: 13.5px;
+            color: var(--muted);
             border-top: 1px solid var(--border);
         }
 
-        .stat-item strong {
-            display: block;
-            font-size: 18px;
+        /* Швидкі картки навігації з головної */
+        .quick-nav-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quick-nav-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .quick-nav-card h3 {
             color: var(--text);
+            font-size: 17px;
+            margin-bottom: 6px;
         }
 
-        .stat-item span {
-            font-size: 11px;
+        .quick-nav-card p {
+            color: var(--muted);
+            font-size: 13.5px;
+            margin-bottom: 12px;
+        }
+
+        .quick-nav-card span {
             color: var(--accent);
+            font-size: 13px;
+            font-weight: 800;
         }
 
-        .tabs-bar {
+        /* Фільтри та бібліотека */
+        .filter-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
-            background: var(--glass);
+            background: var(--card);
             color: var(--text);
             border: 1px solid var(--border);
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 13px;
+            padding: 9px 15px;
+            border-radius: 10px;
+            font-size: 13.5px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .tab-btn.active, .tab-btn:hover {
+        .tab-btn.active {
             background: var(--accent);
-            color: #0b132b;
+            color: var(--black);
             border-color: var(--accent);
         }
 
-        .tab-content {
-            display: none;
+        .search {
+            background: #0b1124;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 320px;
+            font-size: 14px;
         }
 
-        .tab-content.active {
-            display: block;
-            animation: heroAppear 0.35s ease-out;
-        }
-
-        .calc-grid {
+        .lib-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 18px;
         }
 
-        .field-group {
+        .lib-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .lib-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .lib-cat {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .lib-format {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--muted);
+            background: #0b1124;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .lib-card h3 {
+            font-size: 17px;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .lib-card p {
+            font-size: 13.5px;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .tag-chip {
+            font-size: 11.5px;
+            color: var(--accent);
+            background: rgba(148, 179, 251, 0.12);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        /* Внутрішні панелі калькуляторів та шпаргалок */
+        .sub-panel {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+        }
+
+        .sub-panel.active {
+            display: block;
+        }
+
+        .sub-panel h3 {
+            color: var(--accent);
+            font-size: 18px;
+            margin-bottom: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .field {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
-        .field-group label {
+        .field label {
             font-size: 13px;
+            color: var(--muted);
             font-weight: 600;
-            color: var(--text-muted);
         }
 
-        .field-group input, .field-group select, .field-group textarea {
-            background: rgba(8, 13, 28, 0.85);
+        .field input, .field select, .field textarea {
+            background: #0b1124;
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 12px 14px;
-            border-radius: 12px;
+            padding: 11px 13px;
+            border-radius: 10px;
             font-size: 15px;
-            outline: none;
         }
 
-        .field-group input:focus, .field-group select:focus, .field-group textarea:focus {
-            border-color: var(--accent);
-        }
-
-        .result-banner {
-            background: rgba(51, 68, 117, 0.45);
-            border: 1px solid var(--accent);
-            border-radius: 14px;
-            padding: 18px;
+        .results {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            background: var(--card-soft);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 16px;
         }
 
-        .res-box span {
+        .results span {
             display: block;
             font-size: 12px;
             color: var(--accent);
-            text-transform: uppercase;
             font-weight: 700;
+            text-transform: uppercase;
         }
 
-        .res-box strong {
-            font-size: 24px;
+        .results strong {
+            font-size: 22px;
             color: var(--text);
-            font-weight: 900;
         }
 
         .table-wrap {
             overflow-x: auto;
-            border-radius: 14px;
             border: 1px solid var(--border);
+            border-radius: 12px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            text-align: left;
         }
 
         th, td {
-            padding: 12px 14px;
-            border-bottom: 1px solid rgba(148, 179, 251, 0.2);
+            padding: 11px 14px;
+            border-bottom: 1px solid rgba(148, 179, 251, 0.18);
+            text-align: left;
         }
 
         th {
-            background: rgba(51, 68, 117, 0.75);
-            color: var(--accent);
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        tr:hover td {
-            background: rgba(148, 179, 251, 0.08);
-        }
-
-        .search-input {
-            background: rgba(8, 13, 28, 0.85);
-            border: 1px solid var(--border);
+            background: var(--primary);
             color: var(--text);
-            padding: 11px 16px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 340px;
-            font-size: 14px;
-            margin-bottom: 16px;
-            outline: none;
+            font-weight: 700;
         }
 
-        .search-input:focus {
-            border-color: var(--accent);
-        }
-
-        .guide-steps {
+        .steps {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
         }
 
-        .step-card {
-            background: rgba(8, 13, 28, 0.65);
+        .step {
+            background: #0b1124;
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px;
+            border-radius: 12px;
+            padding: 16px;
         }
 
-        .step-num {
+        .step-badge {
             display: inline-block;
             background: var(--accent);
-            color: #0b132b;
-            font-weight: 900;
-            font-size: 12px;
-            padding: 3px 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .step-card h4 {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: var(--text);
-        }
-
-        .step-card p {
-            font-size: 13.5px;
-            color: var(--text-muted);
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 18px;
-        }
-
-        .card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card-badge {
-            display: inline-block;
-            width: fit-content;
+            color: var(--black);
             font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 4px 10px;
-            border-radius: 8px;
-            background: rgba(51, 68, 117, 0.85);
-            border: 1px solid var(--accent);
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .specs {
+            list-style: none;
+            border-top: 1px solid var(--border);
+            margin: 12px 0 16px;
+            padding-top: 10px;
+        }
+
+        .specs li {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13.5px;
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(148, 179, 251, 0.2);
+        }
+
+        .specs li span:first-child {
             color: var(--accent);
-            margin-bottom: 12px;
         }
 
-        .card h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: var(--text);
-        }
-
-        .card p {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 18px;
-        }
-
-        .card-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .link {
             color: var(--accent);
             text-decoration: none;
-            font-size: 14px;
             font-weight: 700;
+            font-size: 14px;
         }
 
-        .card-link:hover {
-            text-decoration: underline;
-        }
-
-        .specs-list {
-            list-style: none;
-            margin-bottom: 16px;
-            border-top: 1px solid var(--border);
-            padding-top: 12px;
-        }
-
-        .specs-list li {
+        .checklist-head {
             display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            padding: 6px 0;
-            border-bottom: 1px dashed rgba(148, 179, 251, 0.25);
-        }
-
-        .specs-list li span:first-child {
-            color: var(--accent);
-        }
-
-        .specs-list li span:last-child {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .checklist-box {
-            background: var(--glass-strong);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid var(--accent);
-            border-radius: 20px;
-            padding: 26px 20px;
-        }
-
-        .checklist-top {
-            display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            margin-top: 8px;
-        }
-
-        .checklist-progress {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--accent);
-            background: rgba(148, 179, 251, 0.14);
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            border-radius: 999px;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
         }
 
         .checklist-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 12px;
-            margin-top: 18px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
         }
 
         .check-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            background: rgba(51, 68, 117, 0.35);
-            padding: 14px;
-            border-radius: 12px;
+            gap: 10px;
+            background: #0b1124;
             border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px;
             cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
             font-size: 14px;
         }
 
-        .check-item:hover {
-            background: rgba(51, 68, 117, 0.6);
-        }
-
         .check-item input {
-            width: 19px;
-            height: 19px;
-            accent-color: #94B3FB;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
             cursor: pointer;
-            flex-shrink: 0;
         }
 
         .check-item.done span {
@@ -701,780 +692,617 @@
         }
 
         footer {
-            padding: 40px 16px 80px;
-            background: rgba(8, 13, 28, 0.9);
+            padding: 26px 0 36px;
             text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            background: rgba(9, 14, 29, 0.85);
         }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 18px 0;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
+        footer a {
             color: var(--accent);
             text-decoration: none;
             font-weight: 700;
-            font-size: 15px;
-        }
-
-        .copyright {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        @media (max-width: 640px) {
-            .nav-links {
-                display: none;
-            }
-            .mobile-nav {
-                display: flex;
-            }
-            .search-input {
-                width: 100%;
-            }
-            .btn {
-                width: 100%;
-            }
-            .hero-stage {
-                transform: none !important;
-            }
+            margin: 0 10px;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="skyCanvas"></canvas>
-    <div class="sky-vignette"></div>
-    <div class="radar-overlay"></div>
-
     <nav>
-        <div class="nav-inner">
-            <a href="#" class="nav-brand">CADETS DRONE</a>
-            <div class="nav-links">
-                <a href="#about">Хто ми</a>
-                <a href="#calcs">Калькулятори</a>
-                <a href="#cheatsheets">Шпаргалки</a>
-                <a href="#tech">Техніка</a>
-                <a href="#checklist">Чек-лист</a>
-                <a href="#feedback">Зворотний зв'язок</a>
+        <div class="container nav-inner">
+            <a class="brand" onclick="openPage('home')">CADETS DRONE</a>
+            <div class="nav-menu">
+                <button class="nav-btn active" data-page="home" onclick="openPage('home')">Про нас</button>
+                <button class="nav-btn" data-page="library" onclick="openPage('library')">Бібліотека</button>
+                <button class="nav-btn" data-page="calcs" onclick="openPage('calcs')">Калькулятори</button>
+                <button class="nav-btn" data-page="cheatsheets" onclick="openPage('cheatsheets')">Шпаргалки</button>
+                <button class="nav-btn" data-page="tech" onclick="openPage('tech')">Техніка</button>
+                <button class="nav-btn" data-page="checklist" onclick="openPage('checklist')">Чек-лист</button>
+                <button class="nav-btn" data-page="feedback" onclick="openPage('feedback')">Зв'язок</button>
             </div>
         </div>
     </nav>
 
-    <div class="mobile-nav">
-        <a href="#about">Хто ми</a>
-        <a href="#calcs">Калькулятори</a>
-        <a href="#cheatsheets">Шпаргалки</a>
-        <a href="#tech">Техніка</a>
-        <a href="#checklist">Чек-лист</a>
-        <a href="#feedback">Зв'язок</a>
-    </div>
-
-    <header class="hero">
+    <main>
         <div class="container">
-            <div class="hero-stage" id="hero3DStage">
-                <div class="drone-emblem" aria-label="CADETS DRONE">
-                    <svg viewBox="0 0 360 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g stroke="#000000" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,255,255,0.28)">
-                            <!-- Центральна рама та батарея -->
-                            <rect x="138" y="42" width="84" height="26" rx="4" />
-                            <path d="M148 42V34H212V42" />
-                            <rect x="122" y="68" width="116" height="16" rx="3" />
-                            <!-- Нижній підвіс та корисне навантаження -->
-                            <path d="M142 84L130 116H230L218 84" />
-                            <rect x="144" y="92" width="72" height="18" rx="3" />
-                            <!-- Антена -->
-                            <path d="M226 68C236 42 238 22 238 12" />
-                            <circle cx="238" cy="10" r="4" />
-                            <!-- Консолі моторів -->
-                            <path d="M122 72L62 60" />
-                            <path d="M238 72L298 60" />
-                            <!-- Мотори та пропелери -->
-                            <rect x="52" y="54" width="20" height="8" rx="2" />
-                            <ellipse cx="62" cy="53" rx="42" ry="3.2" />
-                            <rect x="288" y="54" width="20" height="8" rx="2" />
-                            <ellipse cx="298" cy="53" rx="42" ry="3.2" />
-                            <!-- Ноги / лижі -->
-                            <path d="M134 116L116 130H142" />
-                            <path d="M226 116L244 130H218" />
-                        </g>
-                        <text x="180" y="168" text-anchor="middle" fill="#000000" font-size="28" font-weight="900" letter-spacing="3.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif">CADETS DRONE</text>
-                    </svg>
-                </div>
 
-                <div class="hero-box">
+            <!-- РОЗДІЛ 1: ЗАГЛАВНА — ПРО НАС -->
+            <section id="page-home" class="page-view active">
+                <div class="hero-banner">
+                    <div class="hero-logo-wrap">
+                        <img src="./image 1 (1).png" alt="CADETS DRONE" class="hero-logo-img" loading="eager">
+                    </div>
                     <div class="pill">Технологічна ініціатива курсантів</div>
                     <h1>CADETS DRONE</h1>
                     <p>
-                        Інженерні калькулятори, шпаргалки з частот та налаштувань ELRS/Betaflight, розбір платформ і передпольотний чек-лист для роботи з БпЛА.
+                        Команда курсантів-військових юристів, яка об'єднує практику польотів FPV, налаштування зв'язку, правову базу застосування БпЛА та інженерні інструменти в одному зручному порталі.
                     </p>
-                    <div class="btn-group">
-                        <a href="https://t.me/+_0jUe-LIHXM1NzYy" target="_blank" class="btn btn-accent">
-                            ✈️ Telegram-канал
-                        </a>
-                        <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="btn btn-glass">
-                            📸 Instagram @cadetsdrone
-                        </a>
+                    <div class="btn-row">
+                        <a href="https://t.me/+_0jUe-LIHXM1NzYy" target="_blank" class="btn btn-accent">Telegram-канал</a>
+                        <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="btn btn-primary">Instagram @cadetsdrone</a>
+                        <button class="btn btn-primary" onclick="openPage('library')">Перейти до бібліотеки →</button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </header>
 
-    <section id="about" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Наша історія</span>
-                <h2>Хто ми такі</h2>
-            </div>
-            <div class="about-grid">
-                <div class="about-box">
-                    <h3>Історія проєкту</h3>
-                    <p>
-                        <strong>CADETS DRONE</strong> народився як ініціатива курсантів-військових юристів, які об'єднали інтерес до безпілотних систем, FPV-пілотування та радіозв'язку з системним підходом до технічної підготовки.
-                    </p>
-                    <p>
-                        Ми збираємо перевірені розрахунки, таблиці частот, налаштування та практичні матеріали в одному зручному місці — без зайвої теорії.
-                    </p>
-                    <div class="stats-row">
-                        <div class="stat-item">
-                            <strong>FPV / UAV</strong>
-                            <span>Практична база</span>
-                        </div>
-                        <div class="stat-item">
-                            <strong>ELRS / VTX</strong>
-                            <span>Зв'язок і частоти</span>
-                        </div>
-                        <div class="stat-item">
-                            <strong>24/7</strong>
-                            <span>Довідник у кишені</span>
+                <div class="grid-2">
+                    <div class="box">
+                        <h3>Хто ми і чим займаємося</h3>
+                        <p>
+                            <strong>CADETS DRONE</strong> створений курсантами Військово-юридичного інституту для систематизації знань із безпілотних систем: від пайки та налаштування ELRS/Betaflight до аналізу бойових платформ і нормативного регулювання.
+                        </p>
+                        <p>
+                            Ми пояснюємо складні технічні та правові речі простою мовою, без зайвої «води», щоб кожен міг швидко знайти потрібну формулу, частоту чи документ.
+                        </p>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <strong>FPV / UAV</strong>
+                                <span>Практика та симулятори</span>
+                            </div>
+                            <div class="stat-card">
+                                <strong>3 напрями</strong>
+                                <span>Техніка, РЕБ, Право</span>
+                            </div>
+                            <div class="stat-card">
+                                <strong>24/7</strong>
+                                <span>Інструменти під рукою</span>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="box">
+                        <h3>Наші напрями роботи</h3>
+                        <p><strong>1. Інженерна підготовка:</strong> розрахунок радіогоризонту, ємності АКБ, балістики та підбір комплектуючих для 7"–10" платформ.</p>
+                        <p><strong>2. Радіозв'язок та РЕБ:</strong> сітки частот 5.8 ГГц, протокол ExpressLRS, завадостійкість та захист каналів керування.</p>
+                        <p><strong>3. Правова база БпЛА:</strong> регламенти застосування, облік, порядок передачі та документування роботи екіпажів.</p>
+                    </div>
                 </div>
 
-                <div class="about-box">
-                    <h3>Що є на сайті</h3>
-                    <p>🔹 <strong>Калькулятори:</strong> радиогоризонт зв'язку, час польоту АКБ (LiPo / Li-Ion) і балістика скиду.</p>
-                    <p>🔹 <strong>Шпаргалки:</strong> частоти 5.8 ГГц, дешифратор помилок OSD та писків, сумісність 7"–10" і гайд по ELRS/Betaflight.</p>
-                    <p>🔹 <strong>Практика:</strong> огляд платформ (Vampire, «Вирій»), передпольотний чек-лист та швидка пропозиція тем і матеріалів.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="calcs" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Інженерні розрахунки</span>
-                <h2>Калькулятори пілота</h2>
-            </div>
-
-            <div class="tabs-bar">
-                <button class="tab-btn active" onclick="switchTab('.calc-tab', 'calc-horizon', this)">Радіогоризонт</button>
-                <button class="tab-btn" onclick="switchTab('.calc-tab', 'calc-battery', this)">Час польоту АКБ</button>
-                <button class="tab-btn" onclick="switchTab('.calc-tab', 'calc-ballistics', this)">Балістика скиду</button>
-            </div>
-
-            <div id="calc-horizon" class="tab-content calc-tab active tool-panel">
-                <h3>Калькулятор радіогоризонту</h3>
-                <div class="calc-grid">
-                    <div class="field-group">
-                        <label for="hRx">Висота антени пілота / ретранслятора (м)</label>
-                        <input type="number" id="hRx" value="15" min="0" step="1" oninput="calcHorizon()">
-                    </div>
-                    <div class="field-group">
-                        <label for="hDrone">Висота польоту дрона (м)</label>
-                        <input type="number" id="hDrone" value="120" min="0" step="5" oninput="calcHorizon()">
+                <!-- БЛОК ПІД ФОТО КОМАНДИ -->
+                <div class="box" style="margin-bottom: 24px;">
+                    <h3>Наша команда та будні проєкту</h3>
+                    <p>Фото з тренувань, налаштування бортів та роботи медіакоманди CADETS DRONE.</p>
+                    <div class="photo-grid" id="teamGallery">
+                        <div class="photo-slot">
+                            <div class="photo-frame">
+                                <img src="./photo1.jpg" alt="Команда CADETS DRONE" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div class="photo-placeholder" style="display:none;">Місце для фото 1 (photo1.jpg)</div>
+                            </div>
+                            <div class="photo-caption">Підготовка та налаштування FPV-борту</div>
+                        </div>
+                        <div class="photo-slot">
+                            <div class="photo-frame">
+                                <img src="./photo2.jpg" alt="Тренування CADETS DRONE" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div class="photo-placeholder" style="display:none;">Місце для фото 2 (photo2.jpg)</div>
+                            </div>
+                            <div class="photo-caption">Практичні заняття та робота з апаратурою</div>
+                        </div>
+                        <div class="photo-slot">
+                            <div class="photo-frame">
+                                <img src="./photo3.jpg" alt="Команда проєкту" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div class="photo-placeholder" style="display:none;">Місце для фото 3 (photo3.jpg)</div>
+                            </div>
+                            <div class="photo-caption">Медіа- та інженерна група проєкту</div>
+                        </div>
                     </div>
                 </div>
-                <div class="result-banner">
-                    <div class="res-box">
-                        <span>Геометричний горизонт</span>
-                        <strong id="resHorizon">—</strong>
+
+                <!-- ШВИДКИЙ ПЕРЕХІД ПО РОЗДІЛАХ -->
+                <div class="grid-3">
+                    <div class="quick-nav-card" onclick="openPage('library')">
+                        <div>
+                            <h3>📚 Бібліотека матеріалів</h3>
+                            <p>Література за напрямами: FPV-матчастина, радіозв'язок/РЕБ та нормативна база.</p>
+                        </div>
+                        <span>Відкрити розділ →</span>
                     </div>
-                    <div class="res-box">
-                        <span>Рекомендована дальність</span>
-                        <strong id="resHorizonHalf">—</strong>
+                    <div class="quick-nav-card" onclick="openPage('calcs')">
+                        <div>
+                            <h3>🧮 Калькулятори пілота</h3>
+                            <p>Радіогоризонт, розрахунок часу польоту LiPo/Li-Ion та балістика скиду.</p>
+                        </div>
+                        <span>Відкрити розділ →</span>
+                    </div>
+                    <div class="quick-nav-card" onclick="openPage('cheatsheets')">
+                        <div>
+                            <h3>📋 Шпаргалки та ELRS</h3>
+                            <p>Таблиці частот 5.8 ГГц, помилки OSD/ESC та покроковий гайд Betaflight.</p>
+                        </div>
+                        <span>Відкрити розділ →</span>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div id="calc-battery" class="tab-content calc-tab tool-panel">
-                <h3>Калькулятор часу польоту АКБ (LiPo / Li-Ion)</h3>
-                <div class="calc-grid">
-                    <div class="field-group">
-                        <label for="batCap">Ємність збірки (mAh)</label>
-                        <input type="number" id="batCap" value="8000" min="100" step="100" oninput="calcBattery()">
+            <!-- РОЗДІЛ 2: БІБЛІОТЕКА -->
+            <section id="page-library" class="page-view">
+                <div class="page-header">
+                    <span class="page-tag">База знань</span>
+                    <h2>Бібліотека та довідкові матеріали</h2>
+                    <p>Фільтруй літературу за напрямами або шукай за ключовими словами та тегами.</p>
+                </div>
+
+                <div class="filter-bar">
+                    <div class="tabs" id="libCategoryTabs">
+                        <button class="tab-btn active" onclick="filterLibrary('all', this)">Усі матеріали</button>
+                        <button class="tab-btn" onclick="filterLibrary('fpv', this)">FPV-матчастина</button>
+                        <button class="tab-btn" onclick="filterLibrary('radio', this)">Радіозв'язок / РЕБ</button>
+                        <button class="tab-btn" onclick="filterLibrary('law', this)">Нормативна база БпЛА</button>
                     </div>
-                    <div class="field-group">
-                        <label for="batCells">Кількість банок (S)</label>
-                        <select id="batCells" onchange="calcBattery()">
-                            <option value="4">4S</option>
-                            <option value="6" selected>6S</option>
-                            <option value="8">8S</option>
-                        </select>
+                    <input type="text" id="libSearch" class="search" placeholder="Пошук за назвою або тегом..." oninput="applyLibraryFilter()">
+                </div>
+
+                <div class="lib-grid" id="libraryGrid">
+                    <article class="lib-card" data-cat="fpv">
+                        <div>
+                            <div class="lib-meta">
+                                <span class="lib-cat">FPV-матчастина</span>
+                                <span class="lib-format">Довідник</span>
+                            </div>
+                            <h3>Будова та налаштування FPV-дрона (7"–10")</h3>
+                            <p>Базовий посібник із підбору рами, моторів, ESC, польотного контролера та конфігурації Betaflight.</p>
+                            <div class="tag-list">
+                                <span class="tag-chip">#Betaflight</span>
+                                <span class="tag-chip">#Збірка</span>
+                                <span class="tag-chip">#7-10дюймів</span>
+                            </div>
+                        </div>
+                        <a href="#" class="link" onclick="event.preventDefault();">Матеріал готується до публікації →</a>
+                    </article>
+
+                    <article class="lib-card" data-cat="radio">
+                        <div>
+                            <div class="lib-meta">
+                                <span class="lib-cat">Радіозв'язок / РЕБ</span>
+                                <span class="lib-format">Методичка</span>
+                            </div>
+                            <h3>Основи радіозв'язку БпЛА та протокол ExpressLRS</h3>
+                            <p>Поширення радіохвиль, вибір частот керування й відео, робота з антенами та протидія завадам.</p>
+                            <div class="tag-list">
+                                <span class="tag-chip">#ELRS</span>
+                                <span class="tag-chip">#5.8ГГц</span>
+                                <span class="tag-chip">#Антени</span>
+                            </div>
+                        </div>
+                        <a href="#" class="link" onclick="event.preventDefault();">Матеріал готується до публікації →</a>
+                    </article>
+
+                    <article class="lib-card" data-cat="law">
+                        <div>
+                            <div class="lib-meta">
+                                <span class="lib-cat">Нормативна база БпЛА</span>
+                                <span class="lib-format">Гайд</span>
+                            </div>
+                            <h3>Правове регулювання та порядок застосування БпЛА</h3>
+                            <p>Систематизований огляд нормативних актів, обліку безпілотних систем та документального супроводу.</p>
+                            <div class="tag-list">
+                                <span class="tag-chip">#Право</span>
+                                <span class="tag-chip">#Регламент</span>
+                                <span class="tag-chip">#ОблікБпЛА</span>
+                            </div>
+                        </div>
+                        <a href="#" class="link" onclick="event.preventDefault();">Матеріал готується до публікації →</a>
+                    </article>
+                </div>
+            </section>
+
+            <!-- РОЗДІЛ 3: КАЛЬКУЛЯТОРИ -->
+            <section id="page-calcs" class="page-view">
+                <div class="page-header">
+                    <span class="page-tag">Інженерні розрахунки</span>
+                    <h2>Калькулятори пілота</h2>
+                    <p>Швидкий розрахунок дальності зв'язку, автономності батареї та параметрів скиду.</p>
+                </div>
+
+                <div class="tabs" style="margin-bottom: 16px;">
+                    <button class="tab-btn active" onclick="switchSubPanel('.calc-panel', 'calc-horizon', this)">Радіогоризонт</button>
+                    <button class="tab-btn" onclick="switchSubPanel('.calc-panel', 'calc-battery', this)">Час польоту АКБ</button>
+                    <button class="tab-btn" onclick="switchSubPanel('.calc-panel', 'calc-ballistics', this)">Балістика скиду</button>
+                </div>
+
+                <div id="calc-horizon" class="sub-panel calc-panel active">
+                    <h3>Калькулятор радіогоризонту</h3>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="hRx">Висота антени пілота / ретранслятора (м)</label>
+                            <input type="number" id="hRx" value="15" min="0" step="1" oninput="calcHorizon()">
+                        </div>
+                        <div class="field">
+                            <label for="hDrone">Висота польоту дрона (м)</label>
+                            <input type="number" id="hDrone" value="120" min="0" step="5" oninput="calcHorizon()">
+                        </div>
                     </div>
-                    <div class="field-group">
-                        <label for="batType">Хімія АКБ</label>
-                        <select id="batType" onchange="calcBattery()">
-                            <option value="liion" selected>Li-Ion (дальній політ)</option>
-                            <option value="lipo">LiPo (висока токовіддача)</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label for="batCurrent">Середній струм споживання (A)</label>
-                        <input type="number" id="batCurrent" value="22" min="1" step="1" oninput="calcBattery()">
+                    <div class="results">
+                        <div>
+                            <span>Геометричний горизонт</span>
+                            <strong id="resHorizon">—</strong>
+                        </div>
+                        <div>
+                            <span>Рекомендована дальність</span>
+                            <strong id="resHorizonHalf">—</strong>
+                        </div>
                     </div>
                 </div>
-                <div class="result-banner">
-                    <div class="res-box">
-                        <span>Орієнтовний час</span>
-                        <strong id="resFlightMin">—</strong>
+
+                <div id="calc-battery" class="sub-panel calc-panel">
+                    <h3>Калькулятор часу польоту АКБ (LiPo / Li-Ion)</h3>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="batCap">Ємність збірки (mAh)</label>
+                            <input type="number" id="batCap" value="8000" min="100" step="100" oninput="calcBattery()">
+                        </div>
+                        <div class="field">
+                            <label for="batCells">Кількість банок (S)</label>
+                            <select id="batCells" onchange="calcBattery()">
+                                <option value="4">4S</option>
+                                <option value="6" selected>6S</option>
+                                <option value="8">8S</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="batType">Хімія АКБ</label>
+                            <select id="batType" onchange="calcBattery()">
+                                <option value="liion" selected>Li-Ion (дальній політ)</option>
+                                <option value="lipo">LiPo (висока токовіддача)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="batCurrent">Середній струм споживання (A)</label>
+                            <input type="number" id="batCurrent" value="22" min="1" step="1" oninput="calcBattery()">
+                        </div>
                     </div>
-                    <div class="res-box">
-                        <span>Поріг посадки</span>
-                        <strong id="resMinVolt">—</strong>
+                    <div class="results">
+                        <div>
+                            <span>Орієнтовний час</span>
+                            <strong id="resFlightMin">—</strong>
+                        </div>
+                        <div>
+                            <span>Поріг посадки</span>
+                            <strong id="resMinVolt">—</strong>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="calc-ballistics" class="tab-content calc-tab tool-panel">
-                <h3>Калькулятор балістики скиду</h3>
-                <div class="calc-grid">
-                    <div class="field-group">
-                        <label for="dropAlt">Висота скиду (м)</label>
-                        <input type="number" id="dropAlt" value="100" min="1" step="5" oninput="calcBallistics()">
+                <div id="calc-ballistics" class="sub-panel calc-panel">
+                    <h3>Калькулятор балістики скиду</h3>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="dropAlt">Висота скиду (м)</label>
+                            <input type="number" id="dropAlt" value="100" min="1" step="5" oninput="calcBallistics()">
+                        </div>
+                        <div class="field">
+                            <label for="dropSpeed">Швидкість дрона (км/год)</label>
+                            <input type="number" id="dropSpeed" value="35" min="0" step="1" oninput="calcBallistics()">
+                        </div>
+                        <div class="field">
+                            <label for="dropWind">Боковий вітер (м/с)</label>
+                            <input type="number" id="dropWind" value="0" min="0" step="0.5" oninput="calcBallistics()">
+                        </div>
                     </div>
-                    <div class="field-group">
-                        <label for="dropSpeed">Швидкість дрона (км/год)</label>
-                        <input type="number" id="dropSpeed" value="35" min="0" step="1" oninput="calcBallistics()">
-                    </div>
-                    <div class="field-group">
-                        <label for="dropWind">Боковий вітер (м/с)</label>
-                        <input type="number" id="dropWind" value="0" min="0" step="0.5" oninput="calcBallistics()">
+                    <div class="results">
+                        <div>
+                            <span>Час падіння</span>
+                            <strong id="resFallTime">—</strong>
+                        </div>
+                        <div>
+                            <span>Випередження по курсу</span>
+                            <strong id="resLeadDist">—</strong>
+                        </div>
+                        <div>
+                            <span>Знос вітром</span>
+                            <strong id="resWindDrift">—</strong>
+                        </div>
                     </div>
                 </div>
-                <div class="result-banner">
-                    <div class="res-box">
-                        <span>Час падіння</span>
-                        <strong id="resFallTime">—</strong>
-                    </div>
-                    <div class="res-box">
-                        <span>Випередження по курсу</span>
-                        <strong id="resLeadDist">—</strong>
-                    </div>
-                    <div class="res-box">
-                        <span>Знос вітром</span>
-                        <strong id="resWindDrift">—</strong>
+            </section>
+
+            <!-- РОЗДІЛ 4: ШПАРГАЛКИ -->
+            <section id="page-cheatsheets" class="page-view">
+                <div class="page-header">
+                    <span class="page-tag">Довідник пілота</span>
+                    <h2>Шпаргалки та гайд ELRS / Betaflight</h2>
+                    <p>Таблиці частот 5.8 ГГц, розшифровка помилок OSD, сумісність комплектуючих та налаштування зв'язку.</p>
+                </div>
+
+                <div class="tabs" style="margin-bottom: 16px;">
+                    <button class="tab-btn active" onclick="switchSubPanel('.cheat-panel', 'cheat-freq', this)">Частоти 5.8 ГГц</button>
+                    <button class="tab-btn" onclick="switchSubPanel('.cheat-panel', 'cheat-errors', this)">Помилки OSD та писки</button>
+                    <button class="tab-btn" onclick="switchSubPanel('.cheat-panel', 'cheat-compat', this)">Сумісність 7"–10"</button>
+                    <button class="tab-btn" onclick="switchSubPanel('.cheat-panel', 'cheat-elrs', this)">Гайд ELRS / Betaflight</button>
+                </div>
+
+                <div id="cheat-freq" class="sub-panel cheat-panel active">
+                    <h3>Сітка каналів відеозв'язку (5.8 ГГц)</h3>
+                    <input type="text" id="freqSearch" class="search" placeholder="Пошук за каналом або МГц (R1, 5658)..." oninput="filterRows('freqSearch', '#freqTableBody')">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Бенд</th>
+                                    <th>CH1</th>
+                                    <th>CH2</th>
+                                    <th>CH3</th>
+                                    <th>CH4</th>
+                                    <th>CH5</th>
+                                    <th>CH6</th>
+                                    <th>CH7</th>
+                                    <th>CH8</th>
+                                </tr>
+                            </thead>
+                            <tbody id="freqTableBody">
+                                <tr><td><strong>Raceband (R)</strong></td><td>5658</td><td>5695</td><td>5732</td><td>5769</td><td>5806</td><td>5843</td><td>5880</td><td>5917</td></tr>
+                                <tr><td><strong>FatShark (F)</strong></td><td>5740</td><td>5760</td><td>5780</td><td>5800</td><td>5820</td><td>5840</td><td>5860</td><td>5880</td></tr>
+                                <tr><td><strong>Boscam A</strong></td><td>5865</td><td>5845</td><td>5825</td><td>5805</td><td>5785</td><td>5765</td><td>5745</td><td>5725</td></tr>
+                                <tr><td><strong>Boscam E</strong></td><td>5705</td><td>5685</td><td>5665</td><td>5645</td><td>5885</td><td>5905</td><td>5925</td><td>5945</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <section id="cheatsheets" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Швидкий довідник</span>
-                <h2>Шпаргалки та гайд ELRS / Betaflight</h2>
-            </div>
-
-            <div class="tabs-bar">
-                <button class="tab-btn active" onclick="switchTab('.cheat-tab', 'cheat-freq', this)">Частоти 5.8 ГГц</button>
-                <button class="tab-btn" onclick="switchTab('.cheat-tab', 'cheat-errors', this)">Помилки OSD та писки</button>
-                <button class="tab-btn" onclick="switchTab('.cheat-tab', 'cheat-compat', this)">Сумісність 7"–10"</button>
-                <button class="tab-btn" onclick="switchTab('.cheat-tab', 'cheat-elrs', this)">Гайд ELRS / Betaflight</button>
-            </div>
-
-            <div id="cheat-freq" class="tab-content cheat-tab active tool-panel">
-                <h3>Сітка каналів відеозв'язку (5.8 ГГц)</h3>
-                <input type="text" id="freqSearch" class="search-input" placeholder="Пошук за каналом або МГц (напр. R1, 5658)..." onkeyup="searchFreqTable()">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Бенд</th>
-                                <th>CH1</th>
-                                <th>CH2</th>
-                                <th>CH3</th>
-                                <th>CH4</th>
-                                <th>CH5</th>
-                                <th>CH6</th>
-                                <th>CH7</th>
-                                <th>CH8</th>
-                            </tr>
-                        </thead>
-                        <tbody id="freqTableBody">
-                            <tr>
-                                <td><strong>Raceband (R)</strong></td>
-                                <td>5658</td>
-                                <td>5695</td>
-                                <td>5732</td>
-                                <td>5769</td>
-                                <td>5806</td>
-                                <td>5843</td>
-                                <td>5880</td>
-                                <td>5917</td>
-                            </tr>
-                            <tr>
-                                <td><strong>FatShark (F)</strong></td>
-                                <td>5740</td>
-                                <td>5760</td>
-                                <td>5780</td>
-                                <td>5800</td>
-                                <td>5820</td>
-                                <td>5840</td>
-                                <td>5860</td>
-                                <td>5880</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Boscam A</strong></td>
-                                <td>5865</td>
-                                <td>5845</td>
-                                <td>5825</td>
-                                <td>5805</td>
-                                <td>5785</td>
-                                <td>5765</td>
-                                <td>5745</td>
-                                <td>5725</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Boscam E</strong></td>
-                                <td>5705</td>
-                                <td>5685</td>
-                                <td>5665</td>
-                                <td>5645</td>
-                                <td>5885</td>
-                                <td>5905</td>
-                                <td>5925</td>
-                                <td>5945</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="cheat-errors" class="tab-content cheat-tab tool-panel">
-                <h3>Дешифратор помилок OSD та звукових сигналів</h3>
-                <input type="text" id="errSearch" class="search-input" placeholder="Пошук коду або причини (RXLOSS, ARM, ESC)..." onkeyup="searchErrorsTable()">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Сигнал / Код</th>
-                                <th>Що означає</th>
-                                <th>Швидка перевірка</th>
-                            </tr>
-                        </thead>
-                        <tbody id="errTableBody">
-                            <tr>
-                                <td><strong>RXLOSS</strong></td>
-                                <td>Втрата зв'язку між пультом та RX</td>
-                                <td>Перевірити живлення RX, антени, Binding Phrase і ввімкнений передавач</td>
-                            </tr>
-                            <tr>
-                                <td><strong>ARMING DISABLED</strong></td>
-                                <td>Польотний контролер блокує арм</td>
-                                <td>Перевірити кут нахилу, калібрування акселерометра, стік газу в 0 та режим USB/конфігуратора</td>
-                            </tr>
-                            <tr>
-                                <td><strong>VTX TEMP / OVERHEAT</strong></td>
-                                <td>Перегрів відеопередавача</td>
-                                <td>Зменшити потужність VTX у Pit/25mW на землі, перевірити обдув та відсутність КЗ на антені</td>
-                            </tr>
-                            <tr>
-                                <td><strong>3 короткі + 1–2 довгі</strong></td>
-                                <td>Сигнали ESC при підключенні АКБ</td>
-                                <td>3 короткі — живлення мотора; далі кількість банок (напр. 6 довгих = 6S)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="cheat-compat" class="tab-content cheat-tab tool-panel">
-                <h3>Сумісність компонентів за типорозміром рами</h3>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Клас рами</th>
-                                <th>Мотори (статор / KV)</th>
-                                <th>ESC</th>
-                                <th>Пропелери</th>
-                                <th>АКБ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>7 дюймів (LR)</strong></td>
-                                <td>2806.5 / 2807 (1300KV)</td>
-                                <td>50A–65A (6S)</td>
-                                <td>7x3.5x3 / 7x4x3</td>
-                                <td>6S Li-Ion / LiPo</td>
-                            </tr>
-                            <tr>
-                                <td><strong>8 дюймів</strong></td>
-                                <td>2808 / 3110 (1100–1300KV)</td>
-                                <td>60A–80A (6S–8S)</td>
-                                <td>8x4x3</td>
-                                <td>6S–8S збірка</td>
-                            </tr>
-                            <tr>
-                                <td><strong>10 дюймів (Heavy)</strong></td>
-                                <td>3115 / 4214 (700–900KV)</td>
-                                <td>65A–80A+ (6S–8S)</td>
-                                <td>10x4.5 / 10x5</td>
-                                <td>6S–8S високої ємності</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="cheat-elrs" class="tab-content cheat-tab tool-panel">
-                <h3>Гайд з налаштування ExpressLRS та Betaflight</h3>
-                <div class="guide-steps">
-                    <div class="step-card">
-                        <span class="step-num">КРОК 1</span>
-                        <h4>Binding Phrase та прошивка</h4>
-                        <p>Прошийте TX і RX на однакову версію ExpressLRS та задайте спільну Binding Phrase у веб-інтерфейсі — пристрої зв'яжуться автоматично.</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-num">КРОК 2</span>
-                        <h4>Packet Rate та потужність</h4>
-                        <p>Для дальності обирайте нижчий Packet Rate (напр. 50–150 Hz) та контролюйте динамічну потужність TX. Для маневреності — вищий Packet Rate.</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-num">КРОК 3</span>
-                        <h4>UART та CRSF у Betaflight</h4>
-                        <p>У вкладці Ports увімкніть Serial RX на потрібному UART, а в Receiver виберіть протокол <strong>CRSF</strong>.</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-num">КРОК 4</span>
-                        <h4>Перевірка Failsafe</h4>
-                        <p>Обов'язково протестуйте Failsafe зі знятими пропелерами: при вимкненні пульта мотори мають миттєво зупинитися (Drop/Land).</p>
+                <div id="cheat-errors" class="sub-panel cheat-panel">
+                    <h3>Дешифратор помилок OSD та звукових сигналів</h3>
+                    <input type="text" id="errSearch" class="search" placeholder="Пошук коду або причини (RXLOSS, ARM, ESC)..." oninput="filterRows('errSearch', '#errTableBody')">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Сигнал / Код</th>
+                                    <th>Що означає</th>
+                                    <th>Швидка перевірка</th>
+                                </tr>
+                            </thead>
+                            <tbody id="errTableBody">
+                                <tr>
+                                    <td><strong>RXLOSS</strong></td>
+                                    <td>Втрата зв'язку між пультом та RX</td>
+                                    <td>Перевірити живлення RX, антени, Binding Phrase і ввімкнений передавач</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ARMING DISABLED</strong></td>
+                                    <td>Польотний контролер блокує арм</td>
+                                    <td>Перевірити кут нахилу, калібрування акселерометра, стік газу в 0 та режим USB/конфігуратора</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>VTX TEMP / OVERHEAT</strong></td>
+                                    <td>Перегрів відеопередавача</td>
+                                    <td>Зменшити потужність VTX у Pit/25mW на землі, перевірити обдув та антену</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>3 короткі + 1–2 довгі</strong></td>
+                                    <td>Сигнали ESC при підключенні АКБ</td>
+                                    <td>3 короткі — живлення мотора; далі кількість банок (напр. 6 довгих = 6S)</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <section id="tech" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Платформи</span>
-                <h2>Огляд безпілотних систем</h2>
-            </div>
+                <div id="cheat-compat" class="sub-panel cheat-panel">
+                    <h3>Сумісність компонентів за типорозміром рами</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Клас рами</th>
+                                    <th>Мотори (статор / KV)</th>
+                                    <th>ESC</th>
+                                    <th>Пропелери</th>
+                                    <th>АКБ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>7 дюймів (LR)</strong></td>
+                                    <td>2806.5 / 2807 (1300KV)</td>
+                                    <td>50A–65A (6S)</td>
+                                    <td>7x3.5x3 / 7x4x3</td>
+                                    <td>6S Li-Ion / LiPo</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>8 дюймів</strong></td>
+                                    <td>2808 / 3110 (1100–1300KV)</td>
+                                    <td>60A–80A (6S–8S)</td>
+                                    <td>8x4x3</td>
+                                    <td>6S–8S збірка</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>10 дюймів (Heavy)</strong></td>
+                                    <td>3115 / 4214 (700–900KV)</td>
+                                    <td>65A–80A+ (6S–8S)</td>
+                                    <td>10x4.5 / 10x5</td>
+                                    <td>6S–8S високої ємності</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-            <div class="cards-grid">
-                <div class="card">
-                    <div>
-                        <span class="card-badge">Важкий гексакоптер</span>
+                <div id="cheat-elrs" class="sub-panel cheat-panel">
+                    <h3>Гайд з налаштування ExpressLRS та Betaflight</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-badge">КРОК 1</span>
+                            <h4>Binding Phrase та прошивка</h4>
+                            <p>Прошийте TX і RX на однакову версію ExpressLRS та задайте спільну Binding Phrase у веб-інтерфейсі.</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-badge">КРОК 2</span>
+                            <h4>Packet Rate та потужність</h4>
+                            <p>Для дальності обирайте нижчий Packet Rate (напр. 50–150 Hz) та контролюйте потужність TX.</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-badge">КРОК 3</span>
+                            <h4>UART та CRSF у Betaflight</h4>
+                            <p>У вкладці Ports увімкніть Serial RX на потрібному UART, а в Receiver оберіть протокол CRSF.</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-badge">КРОК 4</span>
+                            <h4>Перевірка Failsafe</h4>
+                            <p>Перевірте Failsafe зі знятими пропелерами: при вимкненні пульта мотори мають зупинитися.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- РОЗДІЛ 5: ТЕХНІКА -->
+            <section id="page-tech" class="page-view">
+                <div class="page-header">
+                    <span class="page-tag">Огляд платформ</span>
+                    <h2>Безпілотні системи</h2>
+                    <p>Технічні особливості та характеристики популярних безпілотних платформ.</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="box">
                         <h3>«Vampire»</h3>
-                        <p>Багатоцільовий ударно-логістичний гексакоптер із нічною оптикою для роботи на дистанціях та доставки вантажів/засобів ураження.</p>
-                        <ul class="specs-list">
+                        <p>Багатоцільовий ударно-логістичний гексакоптер із нічною оптикою для роботи на дистанціях і доставки вантажів або засобів ураження.</p>
+                        <ul class="specs">
                             <li><span>Схема</span><span>6 роторів</span></li>
                             <li><span>Навантаження</span><span>до 15 кг</span></li>
                             <li><span>Режим роботи</span><span>День / ніч (тепловізор)</span></li>
                         </ul>
+                        <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="link">Розбір у Instagram →</a>
                     </div>
-                    <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="card-link">Розбір у Instagram →</a>
-                </div>
-
-                <div class="card">
-                    <div>
-                        <span class="card-badge">FPV-комплекси</span>
+                    <div class="box">
                         <h3>Лінійка «Вирій»</h3>
                         <p>Серійні FPV-платформи різних типорозмірів під бойові завдання, налаштування зв'язку та швидку підготовку до вильоту.</p>
-                        <ul class="specs-list">
+                        <ul class="specs">
                             <li><span>Формат</span><span>7" / 8" / 10"</span></li>
                             <li><span>Керування</span><span>ELRS / частотні рішення</span></li>
                             <li><span>Призначення</span><span>Ударні та розвідувальні місії</span></li>
                         </ul>
-                    </div>
-                    <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="card-link">Огляд у Instagram →</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="checklist" class="reveal">
-        <div class="container">
-            <div class="checklist-box">
-                <span class="section-tag">Безпека</span>
-                <h2>Передпольотний чек-лист</h2>
-                <div class="checklist-top">
-                    <p style="color: var(--text-muted); font-size: 14px;">
-                        Відмічай пункти перед підключенням батареї. Стан зберігається у браузері.
-                    </p>
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                        <span class="checklist-progress" id="checklistCounter">Виконано: 0 / 6</span>
-                        <button type="button" class="btn btn-subtle" onclick="resetChecklist()">Скинути</button>
+                        <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="link">Огляд у Instagram →</a>
                     </div>
                 </div>
+            </section>
 
-                <div class="checklist-grid" id="checklistItems">
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>1. Антени VTX та RX закручені й цілі</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>2. Пропелери затягнуті, напрямок обертання перевірений</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>3. Стік газу в нулі, тумблер Arm вимкнений</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>4. Канал/частота VTX та потужність виставлені вірно</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>5. Напруга банок АКБ у нормі та збалансована</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>6. Зона зльоту та майданчик безпечні</span>
-                    </label>
+            <!-- РОЗДІЛ 6: ЧЕК-ЛИСТ -->
+            <section id="page-checklist" class="page-view">
+                <div class="page-header">
+                    <span class="page-tag">Безпека польотів</span>
+                    <h2>Передпольотний чек-лист</h2>
+                    <p>Обов'язкова перевірка перед підключенням акумулятора. Відмітки зберігаються в браузері.</p>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <section id="feedback" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Зворотний зв'язок</span>
-                <h2>Запропонувати тему або матеріал</h2>
-            </div>
+                <div class="box">
+                    <div class="checklist-head">
+                        <span id="checklistCounter" style="font-weight: 800; color: var(--accent);">Виконано: 0 / 6</span>
+                        <button type="button" class="btn-sm" onclick="resetChecklist()">Скинути відмітки</button>
+                    </div>
 
-            <div class="tool-panel">
-                <h3>Надіслати пропозицію до проєкту</h3>
-                <form onsubmit="sendFeedback(event)">
-                    <div class="calc-grid">
-                        <div class="field-group">
-                            <label for="fbTopic">Тема, калькулятор або шпаргалка</label>
-                            <input type="text" id="fbTopic" placeholder="Наприклад: таблиця частот 915/868 МГц" required>
+                    <div class="checklist-grid" id="checklistItems">
+                        <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>1. Антени VTX та RX закручені й цілі</span></label>
+                        <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>2. Пропелери затягнуті, напрямок обертання перевірений</span></label>
+                        <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>3. Стік газу в нулі, тумблер Arm вимкнений</span></label>
+                        <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>4. Канал/частота VTX та потужність виставлені вірно</span></label>
+                        <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>5. Напруга банок АКБ у нормі та збалансована</span></label>
+                        <label class="check-item"><input type="checkbox" onchange="toggleCheck(this)"><span>6. Зона зльоту та майданчик безпечні</span></label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- РОЗДІЛ 7: ЗВОРОТНИЙ ЗВ'ЯЗОК -->
+            <section id="page-feedback" class="page-view">
+                <div class="page-header">
+                    <span class="page-tag">Контакти та ідеї</span>
+                    <h2>Зворотний зв'язок</h2>
+                    <p>Запропонуй нову тему, книгу для бібліотеки або калькулятор для додавання на сайт.</p>
+                </div>
+
+                <div class="box">
+                    <form onsubmit="sendFeedback(event)">
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="fbTopic">Тема, книга або калькулятор</label>
+                                <input type="text" id="fbTopic" placeholder="Наприклад: посібник з налаштування антен" required>
+                            </div>
+                            <div class="field">
+                                <label for="fbDetails">Короткий опис або посилання</label>
+                                <textarea id="fbDetails" rows="3" placeholder="Що саме додати або уточнити..."></textarea>
+                            </div>
                         </div>
-                        <div class="field-group">
-                            <label for="fbDetails">Короткий опис або посилання</label>
-                            <textarea id="fbDetails" rows="2" placeholder="Що саме додати або уточнити..."></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-accent">Сформувати повідомлення в Telegram</button>
-                </form>
-            </div>
+                        <button type="submit" class="btn btn-accent">Надіслати в Telegram</button>
+                    </form>
+                </div>
+            </section>
+
         </div>
-    </section>
+    </main>
 
     <footer>
         <div class="container">
-            <div class="footer-links">
+            <div>
                 <a href="https://t.me/+_0jUe-LIHXM1NzYy" target="_blank">Telegram-канал</a>
                 <a href="https://www.instagram.com/cadetsdrone" target="_blank">Instagram</a>
             </div>
-            <p class="copyright">© 2026 CADETS DRONE.</p>
+            <p style="margin-top: 8px;">© 2026 CADETS DRONE.</p>
         </div>
     </footer>
 
     <script>
-        const hero3DStage = document.getElementById('hero3DStage');
-        if (hero3DStage) {
-            hero3DStage.addEventListener('mousemove', (e) => {
-                if (window.innerWidth <= 640) return;
-                const rect = hero3DStage.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                hero3DStage.style.transform = `rotateY(${x * 7}deg) rotateX(${-y * 6}deg)`;
-            });
+        let currentLibCat = 'all';
+        const checklistInputs = Array.from(document.querySelectorAll('#checklistItems input'));
+        const checklistCounter = document.getElementById('checklistCounter');
+        const libraryCards = Array.from(document.querySelectorAll('#libraryGrid .lib-card'));
+        const libSearchInput = document.getElementById('libSearch');
+        const pages = document.querySelectorAll('.page-view');
+        const navButtons = document.querySelectorAll('.nav-btn');
 
-            hero3DStage.addEventListener('mouseleave', () => {
-                hero3DStage.style.transform = 'rotateY(0deg) rotateX(0deg)';
-            });
+        function openPage(pageId, updateHash = true) {
+            pages.forEach(sec => sec.classList.remove('active'));
+            navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.page === pageId));
+
+            const target = document.getElementById('page-' + pageId) || document.getElementById('page-home');
+            target.classList.add('active');
+
+            if (updateHash) {
+                history.replaceState(null, '', '#' + pageId);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        const canvas = document.getElementById('skyCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let cloudSprites = [];
-        let clouds3D = [];
-        let pointerX = 0, pointerY = 0;
-
-        window.addEventListener('mousemove', (e) => {
-            pointerX = (e.clientX / window.innerWidth - 0.5) * 2;
-            pointerY = (e.clientY / window.innerHeight - 0.5) * 2;
-        });
-
-        window.addEventListener('deviceorientation', (e) => {
-            if (e.gamma !== null && e.beta !== null) {
-                pointerX = Math.max(-1, Math.min(1, e.gamma / 30));
-                pointerY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
-            }
-        });
-
-        function buildDetailedCumulusSprite(seed) {
-            const off = document.createElement('canvas');
-            off.width = 560;
-            off.height = 320;
-            const octx = off.getContext('2d');
-
-            function rand() {
-                seed = (seed * 16807) % 2147483647;
-                return (seed - 1) / 2147483646;
-            }
-
-            const lobes = [];
-            for (let i = 0; i < 16; i++) {
-                const t = i / 15;
-                const x = 90 + t * 380 + (rand() - 0.5) * 24;
-                const y = 215 + (rand() - 0.5) * 16;
-                const r = 36 + Math.sin(t * Math.PI) * 28 + rand() * 14;
-                lobes.push({ x, y, r, tier: 0 });
-            }
-            for (let i = 0; i < 18; i++) {
-                const t = i / 17;
-                const arch = Math.sin(t * Math.PI);
-                const x = 115 + t * 330 + (rand() - 0.5) * 28;
-                const y = 185 - arch * 42 + (rand() - 0.5) * 22;
-                const r = 34 + arch * 36 + rand() * 16;
-                lobes.push({ x, y, r, tier: 1 });
-            }
-            for (let i = 0; i < 12; i++) {
-                const t = 0.15 + (i / 11) * 0.7;
-                const arch = Math.sin(t * Math.PI);
-                const x = 140 + t * 280 + (rand() - 0.5) * 26;
-                const y = 145 - arch * 54 + (rand() - 0.5) * 20;
-                const r = 28 + arch * 34 + rand() * 14;
-                lobes.push({ x, y, r, tier: 2 });
-            }
-
-            for (const l of lobes) {
-                const g = octx.createRadialGradient(
-                    l.x - l.r * 0.25,
-                    l.y - l.r * 0.35,
-                    l.r * 0.08,
-                    l.x,
-                    l.y + l.r * 0.18,
-                    l.r
-                );
-
-                if (l.tier === 0) {
-                    g.addColorStop(0, 'rgba(186, 208, 242, 0.85)');
-                    g.addColorStop(0.55, 'rgba(128, 160, 214, 0.62)');
-                    g.addColorStop(1, 'rgba(72, 104, 168, 0)');
-                } else if (l.tier === 1) {
-                    g.addColorStop(0, 'rgba(248, 252, 255, 0.92)');
-                    g.addColorStop(0.58, 'rgba(206, 226, 252, 0.68)');
-                    g.addColorStop(1, 'rgba(130, 162, 216, 0)');
-                } else {
-                    g.addColorStop(0, 'rgba(255, 255, 255, 0.98)');
-                    g.addColorStop(0.52, 'rgba(240, 247, 255, 0.78)');
-                    g.addColorStop(1, 'rgba(182, 208, 245, 0)');
-                }
-
-                octx.fillStyle = g;
-                octx.beginPath();
-                octx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
-                octx.fill();
-            }
-
-            return off;
-        }
-
-        function initCloudSprites() {
-            cloudSprites = [
-                buildDetailedCumulusSprite(104729),
-                buildDetailedCumulusSprite(224737),
-                buildDetailedCumulusSprite(350377),
-                buildDetailedCumulusSprite(479909)
-            ];
-        }
-
-        function resizeSky() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-
-        function createCloudInstance(randomX = true) {
-            const layer = Math.random();
-            const scale = 0.45 + layer * 0.85;
-            return {
-                sprite: cloudSprites[Math.floor(Math.random() * cloudSprites.length)],
-                x: randomX ? Math.random() * (width + 520) - 260 : -520,
-                y: Math.random() * (height * 0.72) - 40,
-                scale,
-                speed: 0.14 + layer * 0.34,
-                depth: 0.25 + layer * 0.95,
-                alpha: 0.5 + layer * 0.48
-            };
-        }
-
-        function initClouds() {
-            clouds3D = [];
-            const count = Math.max(12, Math.floor(width / 105));
-            for (let i = 0; i < count; i++) {
-                clouds3D.push(createCloudInstance(true));
-            }
-            clouds3D.sort((a, b) => a.depth - b.depth);
-        }
-
-        function animateSky() {
-            ctx.clearRect(0, 0, width, height);
-
-            for (const c of clouds3D) {
-                c.x += c.speed;
-                if (c.x > width + 320) {
-                    Object.assign(c, createCloudInstance(false));
-                }
-
-                const drawX = c.x + pointerX * 26 * c.depth;
-                const drawY = c.y + pointerY * 16 * c.depth;
-                const drawW = c.sprite.width * c.scale;
-                const drawH = c.sprite.height * c.scale;
-
-                ctx.save();
-                ctx.globalAlpha = c.alpha;
-                ctx.drawImage(c.sprite, drawX, drawY, drawW, drawH);
-                ctx.restore();
-            }
-
-            requestAnimationFrame(animateSky);
-        }
-
-        window.addEventListener('resize', () => {
-            resizeSky();
-            initClouds();
-        });
-
-        initCloudSprites();
-        resizeSky();
-        initClouds();
-        animateSky();
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        function switchTab(groupSelector, tabId, btn) {
-            const parent = btn.closest('section');
-            parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            parent.querySelectorAll(groupSelector).forEach(c => c.classList.remove('active'));
+        function filterLibrary(cat, btn) {
+            currentLibCat = cat;
+            document.querySelectorAll('#libCategoryTabs .tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            const target = document.getElementById(tabId);
-            if (target) target.classList.add('active');
+            applyLibraryFilter();
+        }
+
+        function applyLibraryFilter() {
+            const q = libSearchInput.value.toLowerCase().trim();
+            libraryCards.forEach(card => {
+                const matchCat = currentLibCat === 'all' || card.dataset.cat === currentLibCat;
+                const matchText = !q || card.innerText.toLowerCase().includes(q);
+                card.style.display = (matchCat && matchText) ? 'flex' : 'none';
+            });
+        }
+
+        function switchSubPanel(groupSelector, panelId, btn) {
+            const parent = btn.closest('.page-view');
+            parent.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
+            parent.querySelectorAll(groupSelector).forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(panelId).classList.add('active');
         }
 
         function calcHorizon() {
@@ -1497,17 +1325,15 @@
             const minVoltCell = type === 'lipo' ? '3.50 В' : '2.85 В';
 
             document.getElementById('resFlightMin').innerText = minutes.toFixed(1) + ' хв';
-            document.getElementById('resMinVolt').innerText = minVoltCell + ` (${cells}S: ${(cells * parseFloat(minVoltCell)).toFixed(1)} В)`;
+            document.getElementById('resMinVolt').innerText = `${minVoltCell} (${cells}S: ${(cells * parseFloat(minVoltCell)).toFixed(1)} В)`;
         }
 
         function calcBallistics() {
             const h = Math.max(1, parseFloat(document.getElementById('dropAlt').value) || 100);
             const speedKmh = Math.max(0, parseFloat(document.getElementById('dropSpeed').value) || 35);
             const windMs = Math.max(0, parseFloat(document.getElementById('dropWind').value) || 0);
-            const g = 9.81;
-            const fallTime = Math.sqrt((2 * h) / g);
-            const speedMs = speedKmh / 3.6;
-            const leadMeters = fallTime * speedMs;
+            const fallTime = Math.sqrt((2 * h) / 9.81);
+            const leadMeters = fallTime * (speedKmh / 3.6);
             const driftMeters = fallTime * windMs;
 
             document.getElementById('resFallTime').innerText = fallTime.toFixed(2) + ' с';
@@ -1515,53 +1341,32 @@
             document.getElementById('resWindDrift').innerText = driftMeters.toFixed(1) + ' м';
         }
 
-        function searchFreqTable() {
-            const q = document.getElementById('freqSearch').value.toLowerCase();
-            document.querySelectorAll('#freqTableBody tr').forEach(row => {
+        function filterRows(inputId, tbodySelector) {
+            const q = document.getElementById(inputId).value.toLowerCase();
+            document.querySelectorAll(`${tbodySelector} tr`).forEach(row => {
                 row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
             });
         }
 
-        function searchErrorsTable() {
-            const q = document.getElementById('errSearch').value.toLowerCase();
-            document.querySelectorAll('#errTableBody tr').forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-            });
+        function updateCounter() {
+            const done = checklistInputs.filter(i => i.checked).length;
+            checklistCounter.innerText = `Виконано: ${done} / ${checklistInputs.length}`;
         }
 
-        function updateChecklistCounter() {
-            const inputs = Array.from(document.querySelectorAll('#checklistItems input'));
-            const doneCount = inputs.filter(cb => cb.checked).length;
-            const counter = document.getElementById('checklistCounter');
-            if (counter) {
-                counter.innerText = `Виконано: ${doneCount} / ${inputs.length}`;
-            }
-        }
-
-        function toggleCheck(checkbox) {
-            const label = checkbox.closest('.check-item');
-            if (checkbox.checked) {
-                label.classList.add('done');
-            } else {
-                label.classList.remove('done');
-            }
-            updateChecklistCounter();
-            saveChecklist();
+        function toggleCheck(cb) {
+            cb.closest('.check-item').classList.toggle('done', cb.checked);
+            updateCounter();
+            const states = checklistInputs.map(i => i.checked);
+            localStorage.setItem('cadetsDroneChecklist', JSON.stringify(states));
         }
 
         function resetChecklist() {
-            const inputs = document.querySelectorAll('#checklistItems input');
-            inputs.forEach(cb => {
+            checklistInputs.forEach(cb => {
                 cb.checked = false;
                 cb.closest('.check-item').classList.remove('done');
             });
-            updateChecklistCounter();
-            saveChecklist();
-        }
-
-        function saveChecklist() {
-            const states = Array.from(document.querySelectorAll('#checklistItems input')).map(cb => cb.checked);
-            localStorage.setItem('cadetsDroneChecklist', JSON.stringify(states));
+            updateCounter();
+            localStorage.removeItem('cadetsDroneChecklist');
         }
 
         function sendFeedback(e) {
@@ -1569,1258 +1374,29 @@
             const topic = document.getElementById('fbTopic').value.trim();
             const details = document.getElementById('fbDetails').value.trim();
             if (!topic) return;
-
             const text = encodeURIComponent(`CADETS DRONE — Пропозиція:\nТема: ${topic}\nДеталі: ${details}`);
             window.open(`https://t.me/+_0jUe-LIHXM1NzYy?text=${text}`, '_blank');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            const hashPage = location.hash.replace('#', '');
+            if (hashPage && document.getElementById('page-' + hashPage)) {
+                openPage(hashPage, false);
+            }
+
             calcHorizon();
             calcBattery();
             calcBallistics();
 
             const saved = JSON.parse(localStorage.getItem('cadetsDroneChecklist') || '[]');
-            const inputs = document.querySelectorAll('#checklistItems input');
-            inputs.forEach((cb, index) => {
-                if (saved[index]) {
+            checklistInputs.forEach((cb, i) => {
+                if (saved[i]) {
                     cb.checked = true;
                     cb.closest('.check-item').classList.add('done');
                 }
             });
-            updateChecklistCounter();
+            updateCounter();
         });
     </script>
 </body>
 </html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CADETS DRONE — Технологічний проєкт БпЛА</title>
-    <style>
-        :root {
-            --primary: #334475;
-            --accent: #94B3FB;
-            --text: #FFFFFF;
-            --text-muted: #e9f0ff;
-            --glass: rgba(11, 18, 38, 0.78);
-            --glass-strong: rgba(10, 16, 35, 0.85);
-            --glass-hover: rgba(20, 32, 66, 0.92);
-            --border: rgba(148, 179, 251, 0.35);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
-            scroll-behavior: smooth;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: linear-gradient(180deg, #3c69b5 0%, #75a2e3 28%, #253d75 68%, #0a1126 100%);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        #skyCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -3;
-            pointer-events: none;
-        }
-
-        .sky-vignette {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            pointer-events: none;
-            background:
-                radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 56%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(7, 11, 24, 0.78) 100%);
-        }
-
-        @keyframes radarSpin {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .radar-overlay {
-            position: fixed;
-            top: 42%;
-            left: 50%;
-            width: 140vmax;
-            height: 140vmax;
-            z-index: -1;
-            pointer-events: none;
-            opacity: 0.11;
-            animation: radarSpin 115s linear infinite;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000' viewBox='0 0 1000 1000'%3E%3Cg fill='none' stroke='%2394B3FB' stroke-width='1.5'%3E%3Ccircle cx='500' cy='500' r='220'/%3E%3Ccircle cx='500' cy='500' r='380'/%3E%3Ccircle cx='500' cy='500' r='480' stroke-dasharray='6 12'/%3E%3Cline x1='500' y1='20' x2='500' y2='980' stroke-dasharray='8 10'/%3E%3Cline x1='20' y1='500' x2='980' y2='500' stroke-dasharray='8 10'/%3E%3Cline x1='160' y1='160' x2='840' y2='840' stroke-dasharray='8 10'/%3E%3Cline x1='840' y1='160' x2='160' y2='840' stroke-dasharray='8 10'/%3E%3C/g%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-        }
-
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(10, 16, 34, 0.88);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 18px;
-        }
-
-        .nav-inner {
-            max-width: 1120px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-brand {
-            text-decoration: none;
-            color: var(--text);
-            font-weight: 800;
-            letter-spacing: 1px;
-            font-size: 15px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 18px;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .mobile-nav {
-            display: none;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 8px 16px;
-            background: rgba(10, 16, 34, 0.84);
-            border-bottom: 1px solid var(--border);
-            scrollbar-width: none;
-        }
-
-        .mobile-nav::-webkit-scrollbar {
-            display: none;
-        }
-
-        .mobile-nav a {
-            white-space: nowrap;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent);
-            text-decoration: none;
-            padding: 6px 12px;
-            border-radius: 999px;
-            background: rgba(148, 179, 251, 0.14);
-            border: 1px solid rgba(148, 179, 251, 0.28);
-        }
-
-        .hero {
-            padding: 64px 16px 68px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .container {
-            max-width: 1120px;
-            margin: 0 auto;
-        }
-
-        .hero-box {
-            max-width: 780px;
-            margin: 0 auto;
-            background: var(--glass-strong);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px 24px;
-            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
-            animation: heroAppear 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes heroAppear {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .pill {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 999px;
-            background: rgba(148, 179, 251, 0.18);
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            margin-bottom: 14px;
-        }
-
-        .hero h1 {
-            font-size: clamp(32px, 7.2vw, 54px);
-            font-weight: 900;
-            line-height: 1.08;
-            margin-bottom: 14px;
-            letter-spacing: 0.02em;
-            color: #FFFFFF;
-        }
-
-        .hero p {
-            max-width: 580px;
-            margin: 0 auto 28px;
-            font-size: clamp(14.5px, 3.7vw, 17px);
-            color: var(--text-muted);
-            line-height: 1.55;
-        }
-
-        .btn-group {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(148, 179, 251, 0.45); }
-            50% { box-shadow: 0 0 0 8px rgba(148, 179, 251, 0); }
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px 26px;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 800;
-            text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        .btn-accent {
-            background: var(--accent);
-            color: #0b132b;
-            animation: pulseGlow 2.8s infinite;
-        }
-
-        .btn-glass {
-            background: rgba(51, 68, 117, 0.72);
-            color: #FFFFFF;
-            border: 1px solid var(--accent);
-        }
-
-        .btn-glass:hover {
-            background: rgba(51, 68, 117, 0.95);
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.65s ease-out, transform 0.65s ease-out;
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        section {
-            padding: 56px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .section-header {
-            margin-bottom: 28px;
-        }
-
-        .section-tag {
-            color: var(--accent);
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .section-header h2 {
-            font-size: clamp(24px, 5vw, 34px);
-            font-weight: 800;
-            color: #FFFFFF;
-        }
-
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-            gap: 20px;
-            align-items: stretch;
-        }
-
-        .about-box, .card, .tool-panel {
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 24px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-            transition: transform 0.25s, background 0.25s, border-color 0.25s;
-        }
-
-        .card:hover, .about-box:hover {
-            background: var(--glass-hover);
-            border-color: var(--accent);
-        }
-
-        .about-box h3, .tool-panel h3 {
-            font-size: 19px;
-            margin-bottom: 12px;
-            color: var(--accent);
-        }
-
-        .about-box p {
-            color: #eef3ff;
-            font-size: 15px;
-            margin-bottom: 14px;
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 18px;
-            border-top: 1px solid var(--border);
-        }
-
-        .stat-item strong {
-            display: block;
-            font-size: 18px;
-            color: #FFFFFF;
-        }
-
-        .stat-item span {
-            font-size: 11px;
-            color: var(--accent);
-        }
-
-        .tabs-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            background: var(--glass);
-            color: #FFFFFF;
-            border: 1px solid var(--border);
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active, .tab-btn:hover {
-            background: var(--accent);
-            color: #0b132b;
-            border-color: var(--accent);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: heroAppear 0.35s ease-out;
-        }
-
-        .calc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .field-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .field-group label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .field-group input, .field-group select, .field-group textarea {
-            background: rgba(8, 13, 28, 0.85);
-            border: 1px solid var(--border);
-            color: #FFFFFF;
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        .field-group input:focus, .field-group select:focus, .field-group textarea:focus {
-            border-color: var(--accent);
-        }
-
-        .result-banner {
-            background: rgba(51, 68, 117, 0.45);
-            border: 1px solid var(--accent);
-            border-radius: 14px;
-            padding: 18px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
-        }
-
-        .res-box span {
-            display: block;
-            font-size: 12px;
-            color: var(--accent);
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        .res-box strong {
-            font-size: 24px;
-            color: #FFFFFF;
-            font-weight: 900;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 12px 14px;
-            border-bottom: 1px solid rgba(148, 179, 251, 0.2);
-        }
-
-        th {
-            background: rgba(51, 68, 117, 0.75);
-            color: var(--accent);
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        tr:hover td {
-            background: rgba(148, 179, 251, 0.08);
-        }
-
-        .search-input {
-            background: rgba(8, 13, 28, 0.85);
-            border: 1px solid var(--border);
-            color: #FFFFFF;
-            padding: 11px 16px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 340px;
-            font-size: 14px;
-            margin-bottom: 16px;
-            outline: none;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent);
-        }
-
-        .guide-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
-        }
-
-        .step-card {
-            background: rgba(8, 13, 28, 0.65);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px;
-        }
-
-        .step-num {
-            display: inline-block;
-            background: var(--accent);
-            color: #0b132b;
-            font-weight: 900;
-            font-size: 12px;
-            padding: 3px 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .step-card h4 {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #FFFFFF;
-        }
-
-        .step-card p {
-            font-size: 13.5px;
-            color: var(--text-muted);
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 18px;
-        }
-
-        .card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card-badge {
-            display: inline-block;
-            width: fit-content;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 4px 10px;
-            border-radius: 8px;
-            background: rgba(51, 68, 117, 0.85);
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            margin-bottom: 12px;
-        }
-
-        .card h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #FFFFFF;
-        }
-
-        .card p {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 18px;
-        }
-
-        .card-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .card-link:hover {
-            text-decoration: underline;
-        }
-
-        .specs-list {
-            list-style: none;
-            margin-bottom: 16px;
-            border-top: 1px solid var(--border);
-            padding-top: 12px;
-        }
-
-        .specs-list li {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            padding: 6px 0;
-            border-bottom: 1px dashed rgba(148, 179, 251, 0.25);
-        }
-
-        .specs-list li span:first-child {
-            color: var(--accent);
-        }
-
-        .specs-list li span:last-child {
-            font-weight: 600;
-            color: #FFFFFF;
-        }
-
-        .checklist-box {
-            background: var(--glass-strong);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid var(--accent);
-            border-radius: 20px;
-            padding: 26px 20px;
-        }
-
-        .checklist-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 12px;
-            margin-top: 18px;
-        }
-
-        .check-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(51, 68, 117, 0.35);
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-            font-size: 14px;
-        }
-
-        .check-item:hover {
-            background: rgba(51, 68, 117, 0.6);
-        }
-
-        .check-item input {
-            width: 19px;
-            height: 19px;
-            accent-color: #94B3FB;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .check-item.done span {
-            text-decoration: line-through;
-            opacity: 0.55;
-        }
-
-        footer {
-            padding: 40px 16px 80px;
-            background: rgba(8, 13, 28, 0.9);
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 18px 0;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 15px;
-        }
-
-        .copyright {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        @media (max-width: 640px) {
-            .nav-links {
-                display: none;
-            }
-            .mobile-nav {
-                display: flex;
-            }
-            .search-input {
-                width: 100%;
-            }
-            .btn {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <canvas id="skyCanvas"></canvas>
-    <div class="sky-vignette"></div>
-    <div class="radar-overlay"></div>
-
-    <nav>
-        <div class="nav-inner">
-            <a href="#" class="nav-brand">CADETS DRONE</a>
-            <div class="nav-links">
-                <a href="#about">Хто ми</a>
-                <a href="#calcs">Калькулятори</a>
-                <a href="#cheatsheets">Шпаргалки</a>
-                <a href="#tech">Техніка</a>
-                <a href="#checklist">Чек-лист</a>
-                <a href="#feedback">Зворотний зв'язок</a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="mobile-nav">
-        <a href="#about">Хто ми</a>
-        <a href="#calcs">Калькулятори</a>
-        <a href="#cheatsheets">Шпаргалки</a>
-        <a href="#tech">Техніка</a>
-        <a href="#checklist">Чек-лист</a>
-        <a href="#feedback">Зв'язок</a>
-    </div>
-
-    <header class="hero">
-        <div class="container">
-            <div class="hero-box">
-                <div class="pill">Технологічна ініціатива курсантів</div>
-                <h1>CADETS DRONE</h1>
-                <p>
-                    Інженерні калькулятори, шпаргалки з частот та налаштувань ELRS/Betaflight, розбір платформ і передпольотний чек-лист для роботи з БпЛА.
-                </p>
-                <div class="btn-group">
-                    <a href="https://t.me/+_0jUe-LIHXM1NzYy" target="_blank" class="btn btn-accent">
-                        ✈️ Telegram-канал
-                    </a>
-                    <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="btn btn-glass">
-                        📸 Instagram @cadetsdrone
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <section id="about" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Наша історія</span>
-                <h2>Хто ми такі</h2>
-            </div>
-            <div class="about-grid">
-                <div class="about-box">
-                    <h3>Історія проєкту</h3>
-                    <p>
-                        <strong>CADETS DRONE</strong> народився як ініціатива курсантів-військових юристів, які об'єднали інтерес до безпілотних систем, FPV-пілотування та радіозв'язку з системним підходом до технічної підготовки.
-                    </p>
-                    <p>
-                        Ми збираємо перевірені розрахунки, таблиці частот, налаштування та практичні матеріали в одному зручному місці — без зайвої теорії.
-                    </p>
-                    <div class="stats-row">
-                        <div class="stat-item">
-                            <strong>FPV / UAV</strong>
-                            <span>Практична база</span>
-                        </div>
-                        <div class="stat-item">
-                            <strong>ELRS / VTX</strong>
-                            <span>Зв'язок і частоти</span>
-                        </div>
-                        <div class="stat-item">
-                            <strong>24/7</strong>
-                            <span>Довідник у кишені</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="about-box">
-                    <h3>Що є на сайті</h3>
-                    <p>🔹 <strong>Калькулятори:</strong> радиогоризонт зв'язку, час польоту АКБ (LiPo / Li-Ion) і балістика скиду.</p>
-                    <p>🔹 <strong>Шпаргалки:</strong> частоти 5.8 ГГц, дешифратор помилок OSD та писків, сумісність 7"–10" і гайд по ELRS/Betaflight.</p>
-                    <p>🔹 <strong>Практика:</strong> огляд платформ (Vampire, «Вирій»), передпольотний чек-лист та швидка пропозиція тем і матеріалів.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="calcs" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Інженерні розрахунки</span>
-                <h2>Калькулятори пілота</h2>
-            </div>
-
-            <div class="tabs-bar">
-                <button class="tab-btn active" onclick="switchTab('.calc-tab', 'calc-horizon', this)">Радіогоризонт</button>
-                <button class="tab-btn" onclick="switchTab('.calc-tab', 'calc-battery', this)">Час польоту АКБ</button>
-                <button class="tab-btn" onclick="switchTab('.calc-tab', 'calc-ballistics', this)">Балістика скиду</button>
-            </div>
-
-            <div id="calc-horizon" class="tab-content calc-tab active tool-panel">
-                <h3>Калькулятор радіогоризонту</h3>
-                <div class="calc-grid">
-                    <div class="field-group">
-                        <label for="hRx">Висота антени пілота / ретранслятора (м)</label>
-                        <input type="number" id="hRx" value="15" min="0" step="1" oninput="calcHorizon()">
-                    </div>
-                    <div class="field-group">
-                        <label for="hDrone">Висота польоту дрона (м)</label>
-                        <input type="number" id="hDrone" value="120" min="0" step="5" oninput="calcHorizon()">
-                    </div>
-                </div>
-                <div class="result-banner">
-                    <div class="res-box">
-                        <span>Геометричний горизонт</span>
-                        <strong id="resHorizon">—</strong>
-                    </div>
-                    <div class="res-box">
-                        <span>Рекомендована дальність</span>
-                        <strong id="resHorizonHalf">—</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div id="calc-battery" class="tab-content calc-tab tool-panel">
-                <h3>Калькулятор часу польоту АКБ (LiPo / Li-Ion)</h3>
-                <div class="calc-grid">
-                    <div class="field-group">
-                        <label for="batCap">Ємність збірки (mAh)</label>
-                        <input type="number" id="batCap" value="8000" min="100" step="100" oninput="calcBattery()">
-                    </div>
-                    <div class="field-group">
-                        <label for="batCells">Кількість банок (S)</label>
-                        <select id="batCells" onchange="calcBattery()">
-                            <option value="4">4S</option>
-                            <option value="6" selected>6S</option>
-                            <option value="8">8S</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label for="batType">Хімія АКБ</label>
-                        <select id="batType" onchange="calcBattery()">
-                            <option value="liion" selected>Li-Ion (дальній політ)</option>
-                            <option value="lipo">LiPo (висока токовіддача)</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label for="batCurrent">Середній струм споживання (A)</label>
-                        <input type="number" id="batCurrent" value="22" min="1" step="1" oninput="calcBattery()">
-                    </div>
-                </div>
-                <div class="result-banner">
-                    <div class="res-box">
-                        <span>Орієнтовний час</span>
-                        <strong id="resFlightMin">—</strong>
-                    </div>
-                    <div class="res-box">
-                        <span>Поріг посадки</span>
-                        <strong id="resMinVolt">—</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div id="calc-ballistics" class="tab-content calc-tab tool-panel">
-                <h3>Калькулятор балістики скиду</h3>
-                <div class="calc-grid">
-                    <div class="field-group">
-                        <label for="dropAlt">Висота скиду (м)</label>
-                        <input type="number" id="dropAlt" value="100" min="1" step="5" oninput="calcBallistics()">
-                    </div>
-                    <div class="field-group">
-                        <label for="dropSpeed">Швидкість дрона (км/год)</label>
-                        <input type="number" id="dropSpeed" value="35" min="0" step="1" oninput="calcBallistics()">
-                    </div>
-                </div>
-                <div class="result-banner">
-                    <div class="res-box">
-                        <span>Час падіння</span>
-                        <strong id="resFallTime">—</strong>
-                    </div>
-                    <div class="res-box">
-                        <span>Випередження до цілі</span>
-                        <strong id="resLeadDist">—</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="cheatsheets" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Швидкий довідник</span>
-                <h2>Шпаргалки та гайд ELRS / Betaflight</h2>
-            </div>
-
-            <div class="tabs-bar">
-                <button class="tab-btn active" onclick="switchTab('.cheat-tab', 'cheat-freq', this)">Частоти 5.8 ГГц</button>
-                <button class="tab-btn" onclick="switchTab('.cheat-tab', 'cheat-errors', this)">Помилки OSD та писки</button>
-                <button class="tab-btn" onclick="switchTab('.cheat-tab', 'cheat-compat', this)">Сумісність 7"–10"</button>
-                <button class="tab-btn" onclick="switchTab('.cheat-tab', 'cheat-elrs', this)">Гайд ELRS / Betaflight</button>
-            </div>
-
-            <div id="cheat-freq" class="tab-content cheat-tab active tool-panel">
-                <h3>Сітка каналів відеозв'язку (5.8 ГГц)</h3>
-                <input type="text" id="freqSearch" class="search-input" placeholder="Пошук за каналом або МГц (напр. R1, 5658)..." onkeyup="searchFreqTable()">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Бенд</th>
-                                <th>CH1</th>
-                                <th>CH2</th>
-                                <th>CH3</th>
-                                <th>CH4</th>
-                                <th>CH5</th>
-                                <th>CH6</th>
-                                <th>CH7</th>
-                                <th>CH8</th>
-                            </tr>
-                        </thead>
-                        <tbody id="freqTableBody">
-                            <tr>
-                                <td><strong>Raceband (R)</strong></td>
-                                <td>5658</td>
-                                <td>5695</td>
-                                <td>5732</td>
-                                <td>5769</td>
-                                <td>5806</td>
-                                <td>5843</td>
-                                <td>5880</td>
-                                <td>5917</td>
-                            </tr>
-                            <tr>
-                                <td><strong>FatShark (F)</strong></td>
-                                <td>5740</td>
-                                <td>5760</td>
-                                <td>5780</td>
-                                <td>5800</td>
-                                <td>5820</td>
-                                <td>5840</td>
-                                <td>5860</td>
-                                <td>5880</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Boscam A</strong></td>
-                                <td>5865</td>
-                                <td>5845</td>
-                                <td>5825</td>
-                                <td>5805</td>
-                                <td>5785</td>
-                                <td>5765</td>
-                                <td>5745</td>
-                                <td>5725</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Boscam E</strong></td>
-                                <td>5705</td>
-                                <td>5685</td>
-                                <td>5665</td>
-                                <td>5645</td>
-                                <td>5885</td>
-                                <td>5905</td>
-                                <td>5925</td>
-                                <td>5945</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="cheat-errors" class="tab-content cheat-tab tool-panel">
-                <h3>Дешифратор помилок OSD та звукових сигналів</h3>
-                <input type="text" id="errSearch" class="search-input" placeholder="Пошук коду або причини (RXLOSS, ARM, ESC)..." onkeyup="searchErrorsTable()">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Сигнал / Код</th>
-                                <th>Що означає</th>
-                                <th>Швидка перевірка</th>
-                            </tr>
-                        </thead>
-                        <tbody id="errTableBody">
-                            <tr>
-                                <td><strong>RXLOSS</strong></td>
-                                <td>Втрата зв'язку між пультом та RX</td>
-                                <td>Перевірити живлення RX, антени, Binding Phrase і ввімкнений передавач</td>
-                            </tr>
-                            <tr>
-                                <td><strong>ARMING DISABLED</strong></td>
-                                <td>Польотний контролер блокує арм</td>
-                                <td>Перевірити кут нахилу, калібрування акселерометра, стік газу в 0 та режим USB/конфігуратора</td>
-                            </tr>
-                            <tr>
-                                <td><strong>VTX TEMP / OVERHEAT</strong></td>
-                                <td>Перегрів відеопередавача</td>
-                                <td>Зменшити потужність VTX у Pit/25mW на землі, перевірити обдув та відсутність КЗ на антені</td>
-                            </tr>
-                            <tr>
-                                <td><strong>3 короткі + 1–2 довгі</strong></td>
-                                <td>Сигнали ESC при підключенні АКБ</td>
-                                <td>3 короткі — живлення мотора; далі кількість банок (напр. 6 довгих = 6S)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="cheat-compat" class="tab-content cheat-tab tool-panel">
-                <h3>Сумісність компонентів за типорозміром рами</h3>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Клас рами</th>
-                                <th>Мотори (статор / KV)</th>
-                                <th>ESC</th>
-                                <th>Пропелери</th>
-                                <th>АКБ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>7 дюймів (LR)</strong></td>
-                                <td>2806.5 / 2807 (1300KV)</td>
-                                <td>50A–65A (6S)</td>
-                                <td>7x3.5x3 / 7x4x3</td>
-                                <td>6S Li-Ion / LiPo</td>
-                            </tr>
-                            <tr>
-                                <td><strong>8 дюймів</strong></td>
-                                <td>2808 / 3110 (1100–1300KV)</td>
-                                <td>60A–80A (6S–8S)</td>
-                                <td>8x4x3</td>
-                                <td>6S–8S збірка</td>
-                            </tr>
-                            <tr>
-                                <td><strong>10 дюймів (Heavy)</strong></td>
-                                <td>3115 / 4214 (700–900KV)</td>
-                                <td>65A–80A+ (6S–8S)</td>
-                                <td>10x4.5 / 10x5</td>
-                                <td>6S–8S високої ємності</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="cheat-elrs" class="tab-content cheat-tab tool-panel">
-                <h3>Гайд з налаштування ExpressLRS та Betaflight</h3>
-                <div class="guide-steps">
-                    <div class="step-card">
-                        <span class="step-num">КРОК 1</span>
-                        <h4>Binding Phrase та прошивка</h4>
-                        <p>Прошийте TX і RX на однакову версію ExpressLRS та задайте спільну Binding Phrase у веб-інтерфейсі — пристрої зв'яжуться автоматично.</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-num">КРОК 2</span>
-                        <h4>Packet Rate та потужність</h4>
-                        <p>Для дальності обирайте нижчий Packet Rate (напр. 50–150 Hz) та контролюйте динамічну потужність TX. Для маневреності — вищий Packet Rate.</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-num">КРОК 3</span>
-                        <h4>UART та CRSF у Betaflight</h4>
-                        <p>У вкладці Ports увімкніть Serial RX на потрібному UART, а в Receiver виберіть протокол <strong>CRSF</strong>.</p>
-                    </div>
-                    <div class="step-card">
-                        <span class="step-num">КРОК 4</span>
-                        <h4>Перевірка Failsafe</h4>
-                        <p>Обов'язково протестуйте Failsafe зі знятими пропелерами: при вимкненні пульта мотори мають миттєво зупинитися (Drop/Land).</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="tech" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Платформи</span>
-                <h2>Огляд безпілотних систем</h2>
-            </div>
-
-            <div class="cards-grid">
-                <div class="card">
-                    <div>
-                        <span class="card-badge">Важкий гексакоптер</span>
-                        <h3>«Vampire»</h3>
-                        <p>Багатоцільовий ударно-логістичний гексакоптер із нічною оптикою для роботи на дистанціях та доставки вантажів/засобів ураження.</p>
-                        <ul class="specs-list">
-                            <li><span>Схема</span><span>6 роторів</span></li>
-                            <li><span>Навантаження</span><span>до 15 кг</span></li>
-                            <li><span>Режим роботи</span><span>День / ніч (тепловізор)</span></li>
-                        </ul>
-                    </div>
-                    <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="card-link">Розбір у Instagram →</a>
-                </div>
-
-                <div class="card">
-                    <div>
-                        <span class="card-badge">FPV-комплекси</span>
-                        <h3>Лінійка «Вирій»</h3>
-                        <p>Серійні FPV-платформи різних типорозмірів під бойові завдання, налаштування зв'язку та швидку підготовку до вильоту.</p>
-                        <ul class="specs-list">
-                            <li><span>Формат</span><span>7" / 8" / 10"</span></li>
-                            <li><span>Керування</span><span>ELRS / частотні рішення</span></li>
-                            <li><span>Призначення</span><span>Ударні та розвідувальні місії</span></li>
-                        </ul>
-                    </div>
-                    <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="card-link">Огляд у Instagram →</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="checklist" class="reveal">
-        <div class="container">
-            <div class="checklist-box">
-                <span class="section-tag">Безпека</span>
-                <h2>Передпольотний чек-лист</h2>
-                <p style="color: var(--text-muted); font-size: 14px; margin-top: 6px;">
-                    Відмічай пункти перед підключенням батареї. Стан зберігається у браузері.
-                </p>
-
-                <div class="checklist-grid" id="checklistItems">
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>1. Антени VTX та RX закручені й цілі</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>2. Пропелери затягнуті, напрямок обертання перевірений</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>3. Стік газу в нулі, тумблер Arm вимкнений</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>4. Канал/частота VTX та потужність виставлені вірно</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>5. Напруга банок АКБ у нормі та збалансована</span>
-                    </label>
-                    <label class="check-item">
-                        <input type="checkbox" onchange="toggleCheck(this)">
-                        <span>6. Зона зльоту та майданчик безпечні</span>
-                    </label>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="feedback" class="reveal">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Зворотний зв'язок</span>
-                <h2>Запропонувати тему або матеріал</h2>
-            </div>
-
-            <div class="tool-panel">
-                <h3>Надіслати пропозицію до проєкту</h3>
-                <form onsubmit="sendFeedback(event)">
-                    <div class="calc-grid">
-                        <div class="field-group">
-                            <label for="fbTopic">Тема, калькулятор або шпаргалка</label>
-                            <input type="text" id="fbTopic" placeholder="Наприклад: таблиця частот 915/868 МГц" required>
-                        </div>
-                        <div class="field-group">
-                            <label for="fbDetails">Короткий опис або посилання</label>
-                            <textarea id="fbDetails" rows="2" placeholder="Що саме додати або уточнити..."></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-accent">Сформувати повідомлення в Telegram</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <a href="https://t.me/+_0jUe-LIHXM1NzYy" target="_blank">Telegram-канал</a>
-                <a href="https://www.instagram.com/cadetsdrone" target="_blank">Instagram</a>
-            </div>
-            <p class="copyright">© 2026 CADETS DRONE.</p>
-        </div>
-    </footer>
-
-    <script>
-        const canvas = document.getElementById('skyCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let cloudSprites = [];
-        let clouds3D = [];
-        let pointerX = 0, pointerY = 0;
-
-        window.addEventListener('mousemove', (e) => {
-            pointerX = (e.clientX / window.innerWidth - 0.5) * 2;
-            pointerY = (e.clientY / window.innerHeight - 0.5) * 2;
-        });
-
-        window.addEventListener('deviceorientation', (e) => {
-            if (e.gamma !== null && e.beta !== null) {
-                pointerX = Math.max(-1, Math.min(1, e.gamma / 30));
-                pointerY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
-            }
-        });
-
-        function buildDetailedCumulusSprite(seed) {
-            const off = document.createElement('canvas');
-            off.width = 560;
-            off.height = 320;
-            const octx = off.getContext('2d');
-
-            function rand() {
-                seed = (seed * 16807) % 2147483647;
-                return (seed - 1) / 2147483646;
-            }
-
-            const lobes = [];
-            for (let i = 0; i < 16; i++) {
-                const t = i / 15;
-                const x = 90 + t * 380 + (rand() - 0.5) * 24;
-                const y = 215 + (rand() - 0.5) * 16;
-                const r = 36 + Math.sin(t * Math.PI) * 28 + rand() * 14;
-                lobes.push({ x, y, r, tier: 0 });
-            }
-            for (let i = 0; i < 18; i++) {
-                const t = i / 17;
-                const arch = Math.sin(t * Math.PI);
-                const x = 115 + t * 330 + (rand() - 0.5) * 28;
-                const y = 185 - arch * 42 + (rand() - 0.5) * 22;
-                const r = 34 + arch * 36 + rand() * 16;
-                lobes.push({ x, y, r, tier: 1 });
-            }
-            for (let i = 0; i < 12; i++) {
-                const t = 0.15 + (i / 11) * 0.7;
-                const arch = Math.sin(t * Math.PI);
-                const x = 140 + t * 280 + (rand() - 0.5) * 26;
-                const y = 145 - arch * 54 + (rand() - 0.5) * 20;
-                const r = 28 + arch * 34 + rand() * 14;
-                lobes.push({ x, y, r, tier: 2 });
-            }
-
-            for (const l of lobes) {
