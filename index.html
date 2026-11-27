@@ -146,10 +146,9 @@
         }
 
         .hero {
-            padding: 28px 16px 60px;
+            padding: 64px 16px 68px;
             text-align: center;
             border-bottom: 1px solid var(--border);
-            perspective: 1100px;
         }
 
         .container {
@@ -157,49 +156,15 @@
             margin: 0 auto;
         }
 
-        .hero-stage {
+        .hero-box {
             max-width: 780px;
             margin: 0 auto;
-            transform-style: preserve-3d;
-            transition: transform 0.2s ease-out;
-        }
-
-        @keyframes floatLogo3D {
-            0%, 100% {
-                transform: translate3d(0px, 0px, 24px) rotateZ(-0.5deg);
-            }
-            50% {
-                transform: translate3d(4px, -11px, 38px) rotateZ(0.7deg);
-            }
-        }
-
-        .logo-stage {
-            position: relative;
-            max-width: 380px;
-            margin: 0 auto 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-img {
-            width: 100%;
-            max-width: 350px;
-            height: auto;
-            display: block;
-            -webkit-mask-image: radial-gradient(ellipse 76% 76% at 50% 50%, #000 68%, rgba(0, 0, 0, 0) 100%);
-            mask-image: radial-gradient(ellipse 76% 76% at 50% 50%, #000 68%, rgba(0, 0, 0, 0) 100%);
-            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
-            animation: floatLogo3D 5.2s ease-in-out infinite;
-        }
-
-        .hero-box {
             background: var(--glass-strong);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 32px 24px;
+            padding: 40px 24px;
             box-shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
             animation: heroAppear 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -712,9 +677,6 @@
             .btn {
                 width: 100%;
             }
-            .hero-stage {
-                transform: none !important;
-            }
         }
     </style>
 </head>
@@ -749,25 +711,19 @@
 
     <header class="hero">
         <div class="container">
-            <div class="hero-stage" id="hero3DStage">
-                <div class="logo-stage">
-                    <img src="./logo.png" alt="CADETS DRONE" class="logo-img">
-                </div>
-
-                <div class="hero-box">
-                    <div class="pill">Технологічна ініціатива курсантів</div>
-                    <h1>CADETS DRONE</h1>
-                    <p>
-                        Інженерні калькулятори, шпаргалки з частот та налаштувань ELRS/Betaflight, розбір платформ і передпольотний чек-лист для роботи з БпЛА.
-                    </p>
-                    <div class="btn-group">
-                        <a href="https://t.me/+_0jUe-LIHXM1NzYy" target="_blank" class="btn btn-accent">
-                            ✈️ Telegram-канал
-                        </a>
-                        <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="btn btn-glass">
-                            📸 Instagram @cadetsdrone
-                        </a>
-                    </div>
+            <div class="hero-box">
+                <div class="pill">Технологічна ініціатива курсантів</div>
+                <h1>CADETS DRONE</h1>
+                <p>
+                    Інженерні калькулятори, шпаргалки з частот та налаштувань ELRS/Betaflight, розбір платформ і передпольотний чек-лист для роботи з БпЛА.
+                </p>
+                <div class="btn-group">
+                    <a href="https://t.me/+_0jUe-LIHXM1NzYy" target="_blank" class="btn btn-accent">
+                        ✈️ Telegram-канал
+                    </a>
+                    <a href="https://www.instagram.com/cadetsdrone" target="_blank" class="btn btn-glass">
+                        📸 Instagram @cadetsdrone
+                    </a>
                 </div>
             </div>
         </div>
@@ -1219,21 +1175,6 @@
     </footer>
 
     <script>
-        const hero3DStage = document.getElementById('hero3DStage');
-        if (hero3DStage) {
-            hero3DStage.addEventListener('mousemove', (e) => {
-                if (window.innerWidth <= 640) return;
-                const rect = hero3DStage.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                hero3DStage.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 7}deg)`;
-            });
-
-            hero3DStage.addEventListener('mouseleave', () => {
-                hero3DStage.style.transform = 'rotateY(0deg) rotateX(0deg)';
-            });
-        }
-
         const canvas = document.getElementById('skyCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -1290,215 +1231,3 @@
             }
 
             for (const l of lobes) {
-                const g = octx.createRadialGradient(
-                    l.x - l.r * 0.25,
-                    l.y - l.r * 0.35,
-                    l.r * 0.08,
-                    l.x,
-                    l.y + l.r * 0.18,
-                    l.r
-                );
-
-                if (l.tier === 0) {
-                    g.addColorStop(0, 'rgba(186, 208, 242, 0.85)');
-                    g.addColorStop(0.55, 'rgba(128, 160, 214, 0.62)');
-                    g.addColorStop(1, 'rgba(72, 104, 168, 0)');
-                } else if (l.tier === 1) {
-                    g.addColorStop(0, 'rgba(248, 252, 255, 0.92)');
-                    g.addColorStop(0.58, 'rgba(206, 226, 252, 0.68)');
-                    g.addColorStop(1, 'rgba(130, 162, 216, 0)');
-                } else {
-                    g.addColorStop(0, 'rgba(255, 255, 255, 0.98)');
-                    g.addColorStop(0.52, 'rgba(240, 247, 255, 0.78)');
-                    g.addColorStop(1, 'rgba(182, 208, 245, 0)');
-                }
-
-                octx.fillStyle = g;
-                octx.beginPath();
-                octx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
-                octx.fill();
-            }
-
-            return off;
-        }
-
-        function initCloudSprites() {
-            cloudSprites = [
-                buildDetailedCumulusSprite(104729),
-                buildDetailedCumulusSprite(224737),
-                buildDetailedCumulusSprite(350377),
-                buildDetailedCumulusSprite(479909)
-            ];
-        }
-
-        function resizeSky() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-
-        function createCloudInstance(randomX = true) {
-            const layer = Math.random();
-            const scale = 0.45 + layer * 0.85;
-            return {
-                sprite: cloudSprites[Math.floor(Math.random() * cloudSprites.length)],
-                x: randomX ? Math.random() * (width + 520) - 260 : -520,
-                y: Math.random() * (height * 0.72) - 40,
-                scale,
-                speed: 0.14 + layer * 0.34,
-                depth: 0.25 + layer * 0.95,
-                alpha: 0.5 + layer * 0.48
-            };
-        }
-
-        function initClouds() {
-            clouds3D = [];
-            const count = Math.max(12, Math.floor(width / 105));
-            for (let i = 0; i < count; i++) {
-                clouds3D.push(createCloudInstance(true));
-            }
-            clouds3D.sort((a, b) => a.depth - b.depth);
-        }
-
-        function animateSky() {
-            ctx.clearRect(0, 0, width, height);
-
-            for (const c of clouds3D) {
-                c.x += c.speed;
-                if (c.x > width + 320) {
-                    Object.assign(c, createCloudInstance(false));
-                }
-
-                const drawX = c.x + pointerX * 26 * c.depth;
-                const drawY = c.y + pointerY * 16 * c.depth;
-                const drawW = c.sprite.width * c.scale;
-                const drawH = c.sprite.height * c.scale;
-
-                ctx.save();
-                ctx.globalAlpha = c.alpha;
-                ctx.drawImage(c.sprite, drawX, drawY, drawW, drawH);
-                ctx.restore();
-            }
-
-            requestAnimationFrame(animateSky);
-        }
-
-        window.addEventListener('resize', () => {
-            resizeSky();
-            initClouds();
-        });
-
-        initCloudSprites();
-        resizeSky();
-        initClouds();
-        animateSky();
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        function switchTab(groupSelector, tabId, btn) {
-            const parent = btn.closest('section');
-            parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            parent.querySelectorAll(groupSelector).forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            const target = document.getElementById(tabId);
-            if (target) target.classList.add('active');
-        }
-
-        function calcHorizon() {
-            const h1 = Math.max(0, parseFloat(document.getElementById('hRx').value) || 0);
-            const h2 = Math.max(0, parseFloat(document.getElementById('hDrone').value) || 0);
-            const dist = 3.57 * (Math.sqrt(h1) + Math.sqrt(h2));
-            document.getElementById('resHorizon').innerText = dist.toFixed(2) + ' км';
-            document.getElementById('resHorizonHalf').innerText = (dist * 0.75).toFixed(2) + ' км (з запасом)';
-        }
-
-        function calcBattery() {
-            const capMah = Math.max(100, parseFloat(document.getElementById('batCap').value) || 4200);
-            const cells = parseInt(document.getElementById('batCells').value, 10) || 6;
-            const type = document.getElementById('batType').value;
-            const avgCurrent = Math.max(1, parseFloat(document.getElementById('batCurrent').value) || 25);
-
-            const usableFactor = type === 'lipo' ? 0.78 : 0.85;
-            const usableAh = (capMah / 1000) * usableFactor;
-            const minutes = (usableAh / avgCurrent) * 60;
-            const minVoltCell = type === 'lipo' ? '3.50 В' : '2.85 В';
-
-            document.getElementById('resFlightMin').innerText = minutes.toFixed(1) + ' хв';
-            document.getElementById('resMinVolt').innerText = minVoltCell + ` (${cells}S: ${(cells * parseFloat(minVoltCell)).toFixed(1)} В)`;
-        }
-
-        function calcBallistics() {
-            const h = Math.max(1, parseFloat(document.getElementById('dropAlt').value) || 100);
-            const speedKmh = Math.max(0, parseFloat(document.getElementById('dropSpeed').value) || 35);
-            const g = 9.81;
-            const fallTime = Math.sqrt((2 * h) / g);
-            const speedMs = speedKmh / 3.6;
-            const leadMeters = fallTime * speedMs;
-
-            document.getElementById('resFallTime').innerText = fallTime.toFixed(2) + ' с';
-            document.getElementById('resLeadDist').innerText = leadMeters.toFixed(1) + ' м';
-        }
-
-        function searchFreqTable() {
-            const q = document.getElementById('freqSearch').value.toLowerCase();
-            document.querySelectorAll('#freqTableBody tr').forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-            });
-        }
-
-        function searchErrorsTable() {
-            const q = document.getElementById('errSearch').value.toLowerCase();
-            document.querySelectorAll('#errTableBody tr').forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-            });
-        }
-
-        function toggleCheck(checkbox) {
-            const label = checkbox.closest('.check-item');
-            if (checkbox.checked) {
-                label.classList.add('done');
-            } else {
-                label.classList.remove('done');
-            }
-            saveChecklist();
-        }
-
-        function saveChecklist() {
-            const states = Array.from(document.querySelectorAll('#checklistItems input')).map(cb => cb.checked);
-            localStorage.setItem('cadetsDroneChecklist', JSON.stringify(states));
-        }
-
-        function sendFeedback(e) {
-            e.preventDefault();
-            const topic = document.getElementById('fbTopic').value.trim();
-            const details = document.getElementById('fbDetails').value.trim();
-            if (!topic) return;
-
-            const text = encodeURIComponent(`CADETS DRONE — Пропозиція:\nТема: ${topic}\nДеталі: ${details}`);
-            window.open(`https://t.me/+_0jUe-LIHXM1NzYy?text=${text}`, '_blank');
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            calcHorizon();
-            calcBattery();
-            calcBallistics();
-
-            const saved = JSON.parse(localStorage.getItem('cadetsDroneChecklist') || '[]');
-            const inputs = document.querySelectorAll('#checklistItems input');
-            inputs.forEach((cb, index) => {
-                if (saved[index]) {
-                    cb.checked = true;
-                    cb.closest('.check-item').classList.add('done');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
